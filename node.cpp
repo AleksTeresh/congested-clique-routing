@@ -145,7 +145,8 @@ public:
         last_idx_per_set.resize(sqrt(nodes.size()));
 
         for (auto i = messages.begin(); i != messages.end();) {
-            int dest_set_idx = get_set_from_node_id((*i)->dest);
+            auto message = *i;
+            int dest_set_idx = get_set_from_node_id(message->dest);
             if (dest_set_idx != src_set_idx) {
                 int intermediate_dest = get_nth_node_in_set(
                         dest_set_idx,
@@ -153,7 +154,7 @@ public:
                 );
 
                 last_idx_per_set[dest_set_idx]++;
-                send_message((*i), intermediate_dest);
+                send_message(message, intermediate_dest);
                 i = messages.erase(i);
             } else {
                 i++;
@@ -199,8 +200,9 @@ public:
     // step 2 of Corollary 3.4
     void send_within_set_round2() {
         for (auto i = neighbour_message_count.begin(); i != neighbour_message_count.end();) {
-            if ((*i)->info_dest != global_idx) {
-                nodes[(*i)->info_dest]->announce_neighbour_message_count((*i));
+            auto mc = *i;
+            if (mc->info_dest != global_idx) {
+                nodes[mc->info_dest]->announce_neighbour_message_count(mc);
                 i = neighbour_message_count.erase(i);
             } else {
                 i++;
@@ -230,8 +232,9 @@ public:
                 if (c == global_idx) continue; // skip sending messages to itself
 
                 for (auto i = messages.begin(); i != messages.end();) {
-                    if ((*i)->dest == global_dest_idx) {
-                        send_message((*i), c);
+                    auto message = *i;
+                    if (message->dest == global_dest_idx) {
+                        send_message(message, c);
                         i = messages.erase(i);
                         break;
                     } else {
@@ -244,8 +247,9 @@ public:
 
     void send_within_set_round4() {
         for (auto i = messages.begin(); i != messages.end();) {
-            if ((*i)->dest != global_idx) {
-                send_message((*i), (*i)->dest);
+            auto message = *i;
+            if (message->dest != global_idx) {
+                send_message(message, message->dest);
                 i = messages.erase(i);
             } else {
                 i++;
