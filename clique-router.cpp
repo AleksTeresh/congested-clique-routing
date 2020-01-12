@@ -31,7 +31,16 @@ private:
 
     void move_messages_within_sets(vector<Node*>& nodes) {
         for (auto node : nodes) {
-            node->send_within_set();
+            node->send_within_set_round1();
+        }
+        for (auto node : nodes) {
+            node->send_within_set_round2();
+        }
+        for (auto node : nodes) {
+            node->send_within_set_round3();
+        }
+        for (auto node : nodes) {
+            node->send_within_set_round4();
         }
     }
 
