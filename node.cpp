@@ -38,6 +38,22 @@ private:
     vector<MessageCount*> neighbour_message_count;
     vector<Node*> nodes;
 
+    int message_sent_count = 0;
+
+    void start_message_count() {
+        message_sent_count = 0;
+    }
+
+    void check_message_count() {
+        check_message_count(nodes.size() - 1);
+    }
+
+    void check_message_count(int max_size) {
+        // make sure a nodes does not send more than N-1 messages per round
+        // (a nodes does not send a message to itself => N-1
+        assert(message_sent_count <= max_size);
+    }
+
     int get_set_from_node_id(int node_id) {
         int node_count = nodes.size();
         int set_count = sqrt(node_count);
@@ -55,7 +71,14 @@ private:
     }
 
     void send_message(Message* message, int intermediate_dest) {
+        assert(message->src == global_idx); // a node can call send_message only on itself
         nodes[intermediate_dest]->add_message(message);
+        message_sent_count++;
+    }
+
+    void send_neighbour_message_count(MessageCount* mc, int intermediate_dest) {
+        nodes[intermediate_dest]->add_neighbour_message_count(mc);
+        message_sent_count++;
     }
 
     Message* get_message_by_dest(int dest) {
@@ -75,12 +98,12 @@ private:
 
         // color the graph
         for (int src_i = 0; src_i < SET_SIZE; src_i++) {
-            int c = 0;
+            int c = src_i % 2 == 0 ? 0 : (nodes.size() - 1);
             for (int dest_i = 0; dest_i < SET_SIZE; dest_i++) {
                 int message_count = all_messages[src_i][dest_i];
                 for (int message_i = 0; message_i < message_count; message_i++) {
                     colors[src_i][dest_i].push_back(c);
-                    c++;
+                    c = src_i % 2 == 0 ? (c+1) : (c-1);
                 }
             }
         }
@@ -121,7 +144,7 @@ public:
         return get_set_from_node_id(this->global_idx);
     }
 
-    void announce_neighbour_message_count(MessageCount* mc) {
+    void add_neighbour_message_count(MessageCount* mc) {
         this->neighbour_message_count.push_back(mc);
     }
 
@@ -148,6 +171,7 @@ public:
         vector<int> last_idx_per_set;
         last_idx_per_set.resize(sqrt(nodes.size()));
 
+        start_message_count();
         for (auto i = messages.begin(); i != messages.end();) {
             auto message = *i;
             int dest_set_idx = get_set_from_node_id(message->dest);
@@ -164,6 +188,7 @@ public:
                 i++;
             }
         }
+        check_message_count();
     }
 
     void send_within_set_round1() {
@@ -179,6 +204,7 @@ public:
         int src_idx_in_set = get_node_idx_in_set(global_idx);
         int set_id = get_set_idx();
 
+        start_message_count();
         // step 1 of Corollary 3.4
         for (int dest_inset_i = 0; dest_inset_i < SET_SIZE; dest_inset_i++) { // destination node of the message
             for (int about_node_inset_i = 0; about_node_inset_i < SET_SIZE; about_node_inset_i++) { // the message contains info about this node
@@ -196,22 +222,25 @@ public:
                         message_count_to_destination,
                         global_dest_idx
                 );
-                nodes[c]->announce_neighbour_message_count(mc);
+                send_neighbour_message_count(mc, c);
             }
         }
+        check_message_count(nodes.size());
     }
 
     // step 2 of Corollary 3.4
     void send_within_set_round2() {
+        start_message_count();
         for (auto i = neighbour_message_count.begin(); i != neighbour_message_count.end();) {
             auto mc = *i;
             if (mc->info_dest != global_idx) {
-                nodes[mc->info_dest]->announce_neighbour_message_count(mc);
+                send_neighbour_message_count(mc, mc->info_dest);
                 i = neighbour_message_count.erase(i);
             } else {
                 i++;
             }
         }
+        check_message_count();
     }
 
     void send_within_set_round3() {
@@ -228,6 +257,7 @@ public:
         int src_idx_in_set = get_node_idx_in_set(global_idx);
         int set_id = get_set_idx();
 
+        start_message_count();
         for (int dest_inset_idx = 0; dest_inset_idx < SET_SIZE; dest_inset_idx++) { // destination node of the message
             int global_dest_idx = get_nth_node_in_set(set_id, dest_inset_idx);
             if (global_dest_idx == global_idx) continue; // skip sending messages to itself
@@ -247,9 +277,11 @@ public:
                 }
             }
         }
+        check_message_count();
     }
 
     void send_within_set_round4() {
+        start_message_count();
         for (auto i = messages.begin(); i != messages.end();) {
             auto message = *i;
             if (message->dest != global_idx) {
@@ -259,5 +291,6 @@ public:
                 i++;
             }
         }
+        check_message_count();
     }
 };
