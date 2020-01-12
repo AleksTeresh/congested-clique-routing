@@ -1,6 +1,6 @@
 #include "clique-router.cpp"
 
-int test_step_4() {
+int test_step_4_and_5() {
     vector<Node*> nodes;
 
     auto n1 = new Node(0);
@@ -26,9 +26,18 @@ int test_step_4() {
     CliqueRouter cr;
     cr.route(nodes);
 
+    for (auto node : nodes) {
+        int global_id = node->get_node_idx();
+        auto messages = node->get_messages();
+
+        for (auto m : messages) {
+            assert(m->dest == global_id);
+        }
+    }
+
     return 0;
 }
 
 int main() {
-    test_step_4();
+    test_step_4_and_5();
 }

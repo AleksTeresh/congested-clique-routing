@@ -93,6 +93,10 @@ public:
         this->global_idx = global_idx;
     }
 
+    vector<Message*>& get_messages() {
+        return messages;
+    }
+
     void add_messages(vector<int>& new_messages) {
         for (int message : new_messages) {
             add_message(message);
