@@ -62,12 +62,6 @@ private:
         assert(message_sent_count <= max_size);
     }
 
-    int get_set_from_node_id(int node_id) {
-        int node_count = nodes.size();
-        int set_count = sqrt(node_count);
-        return node_id / set_count;
-    }
-
     int get_node_idx_in_set(int node_id) {
         int node_count = nodes.size();
         int set_count = sqrt(node_count);
@@ -100,7 +94,7 @@ private:
 
     Message* get_message_by_dest_set(int dest) {
         for (auto m : messages) {
-            if (m->next_dest == -1 && get_set_from_node_id(m->dest) == dest) {
+            if (m->next_dest == -1 && get_set_from_node_id(nodes, m->dest) == dest) {
                 return m;
             }
         }
@@ -179,6 +173,12 @@ public:
         this->global_idx = global_idx;
     }
 
+    static int get_set_from_node_id(vector<Node*>& nodes, int node_id) {
+        int node_count = nodes.size();
+        int set_count = sqrt(node_count);
+        return node_id / set_count;
+    }
+
     vector<Message*>& get_messages() {
         return messages;
     }
@@ -204,7 +204,7 @@ public:
     }
 
     int get_set_idx() {
-        return get_set_from_node_id(this->global_idx);
+        return get_set_from_node_id(nodes, this->global_idx);
     }
 
     void add_neighbour_message_count(MessageCount* mc) {
@@ -229,7 +229,7 @@ public:
         message_counts.resize(SET_SIZE);
         // at this point all messages are destined within W only
         for (auto message : messages) {
-            message_counts[get_set_from_node_id(message->dest)]++;
+            message_counts[get_set_from_node_id(nodes, message->dest)]++;
         }
 
         vector<vector<int>> edge_counts(SET_SIZE, vector<int>(SET_SIZE, SET_SIZE));
@@ -371,7 +371,7 @@ public:
         start_message_count();
         for (auto i = messages.begin(); i != messages.end();) {
             auto message = *i;
-            int dest_set_idx = get_set_from_node_id(message->dest);
+            int dest_set_idx = get_set_from_node_id(nodes, message->dest);
             if (dest_set_idx != src_set_idx) {
                 int intermediate_dest = get_nth_node_in_set(
                         dest_set_idx,
