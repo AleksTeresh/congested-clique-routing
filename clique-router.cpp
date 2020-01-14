@@ -1,4 +1,4 @@
-#include "node.cpp"
+#include "node.h"
 #include <vector>
 
 using namespace std;
