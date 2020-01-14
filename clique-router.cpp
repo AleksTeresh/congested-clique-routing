@@ -19,7 +19,20 @@ private:
 
     void move_messages2(vector<Node*>& nodes) {
         for (auto node : nodes) {
-            node->step3();
+            node->clear_neighbour_mcs();
+        }
+        
+        for (auto node : nodes) {
+            node->step3_round1();
+        }
+        for (auto node : nodes) {
+            node->step3_round2();
+        }
+        for (auto node : nodes) {
+            node->step3_round3();
+        }
+        for (auto node : nodes) {
+            node->step3_round4();
         }
     }
 
@@ -30,6 +43,9 @@ private:
     }
 
     void move_messages_within_sets(vector<Node*>& nodes) {
+        for (auto node : nodes) {
+            node->clear_neighbour_mcs();
+        }
         for (auto node : nodes) {
             node->send_within_set_round1();
         }
