@@ -319,7 +319,7 @@ public:
                 if (c == global_idx) { // skip sending messages to itself
                     for (auto i = messages.begin(); i != messages.end();) {
                         auto message = *i;
-                        if (message->next_dest == dest_inset_idx && message->step_to_be_sent != 3) {
+                        if (message->next_dest == global_dest_idx && message->step_to_be_sent != 3) {
                             message->step_to_be_sent = 3;
                             break;
                         } else {
@@ -331,7 +331,7 @@ public:
 
                 for (auto i = messages.begin(); i != messages.end();) {
                     auto message = *i;
-                    if (message->next_dest == dest_inset_idx && message->step_to_be_sent != 3) {
+                    if (message->next_dest == global_dest_idx && message->step_to_be_sent != 3) {
                         send_message(message, c, 3);
                         i = messages.erase(i);
                         break;
