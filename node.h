@@ -57,17 +57,32 @@ private:
 
     void send_neighbour_message_count(MessageCount* mc, int intermediate_dest);
 
-    Message* get_message_by_dest(int dest);
+    Message* get_message(std::function<bool(Message*)> prerequisite);
+
+    std::vector<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
 
     Message* get_message_by_dest_set(int dest);
     // current assumption is that number of nodes in a set is always 2
     // Due to this, the coloring algorithm is trivial
     std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>>& all_messages);
 
-    void corollary34_step1(std::vector<int>& message_counts);
+    void corollary34_round1(std::vector<int>& message_counts, const std::function<int(int)>& dest_from_inset_node_idx);
 
-    void corollary_34_step2();
+    void corollary_34_round2();
 
+    void corollary_34_round3(std::vector<std::vector<int>>& edge_counts, int current_algo_step);
+
+    void corollary_34_round4(int current_algo_step);
+
+    void prepare_message_for_final_transfer();
+
+    std::vector<std::vector<int>> step3_round3_create_graph(
+            std::vector<std::vector<int>>& message_count_per_src_node
+    );
+
+    void send_message_to_color(int color, int dest_of_message, int curr_algo_step);
+
+    void send_message_to_itself(int dest_of_message, int curr_algo_step);
 
 public:
     explicit Node(int global_idx) {
