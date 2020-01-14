@@ -75,8 +75,6 @@ Message* Node::get_message_by_dest_set(int dest) {
 vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>>& all_messages) {
     vector<vector<vector<int>>> colors(SET_SIZE, vector<vector<int>>(SET_SIZE, vector<int>()));
 
-    int set_idx = get_set_idx();
-
     // color the graph
     for (int src_i = 0; src_i < SET_SIZE; src_i++) {
         int c = src_i % 2 == 0 ? 0 : (nodes.size() - 1);
