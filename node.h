@@ -126,14 +126,17 @@ public:
 
     void init(std::vector<Node*>& nodes_to_init);
 
-    void step2();
+    void step2_round1();
+    void step2_round2();
+    void step2_round3();
+    void step2_round4();
+    void step2_round5();
+    void step2_round6();
+    void step2_round7();
 
     void step3_round1();
-
     void step3_round2();
-
     void step3_round3();
-
     void step3_round4();
 
     void clear_neighbour_mcs();
@@ -141,12 +144,8 @@ public:
     void send_cross_set();
 
     void send_within_set_round1();
-
-    // step 2 of Corollary 3.4
     void send_within_set_round2();
-
     void send_within_set_round3();
-
     void send_within_set_round4();
 };
 

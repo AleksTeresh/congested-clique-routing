@@ -249,7 +249,70 @@ void Node::init(vector<Node*>& nodes_to_init) {
     neighbour_message_count = vector<MessageCount*>();
 }
 
-void Node::step2() {
+void Node::step2_round1() {
+    vector<int> message_counts(SET_SIZE, 0);
+    for (auto message : messages) {
+        int dest_set_idx = get_set_from_node_id(nodes, message->dest);
+        message_counts[dest_set_idx]++;
+    }
+
+    for (int i = 0; i < SET_SIZE; i++) {
+        int local_dest_idx = i;
+        int global_dest_idx = get_nth_node_in_set(get_set_idx(), local_dest_idx);
+        int set_idx = i;
+
+        auto mc = new MessageCount(
+                get_set_idx(),
+                set_idx,
+                message_counts[set_idx],
+                -1
+        );
+        send_neighbour_message_count(mc, global_dest_idx);
+    }
+}
+
+void Node::step2_round2() {
+    vector<int> message_counts(SET_SIZE, 0);
+    for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
+        auto mc = *it;
+        if (mc->msg_src == get_set_idx() && mc->info_dest == -1) {
+            int dest_set_idx = mc->msg_dest;
+            message_counts[dest_set_idx]++;
+            it = neighbour_message_count.erase(it);
+        } else {
+            it++;
+        }
+    }
+
+    for (auto node : nodes) {
+        int i = get_node_idx_in_set(global_idx);
+        auto mc = new MessageCount(
+                get_set_idx(),
+                i,
+                message_counts[i],
+                node->get_node_idx()
+        );
+        send_neighbour_message_count(mc, node->get_node_idx());
+    }
+}
+
+void Node::step2_round3() {
+    // TODO: Algorithm 2
+}
+
+void Node::step2_round4() {
+    // TODO: Algorithm 2
+}
+
+void Node::step2_round5() {
+    // TODO: Algorithm 2
+}
+
+void Node::step2_round6() {
+    // TODO: Algorithm 2
+}
+
+void Node::step2_round7() {
     // TODO: Algorithm 2
 }
 

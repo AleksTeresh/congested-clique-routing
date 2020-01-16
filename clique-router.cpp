@@ -13,7 +13,29 @@ private:
 
     void move_messages1(vector<Node*>& nodes) {
         for (auto node : nodes) {
-            node->step2();
+            node->clear_neighbour_mcs();
+        }
+
+        for (auto node : nodes) {
+            node->step2_round1();
+        }
+        for (auto node : nodes) {
+            node->step2_round2();
+        }
+        for (auto node : nodes) {
+            node->step2_round3();
+        }
+        for (auto node : nodes) {
+            node->step2_round4();
+        }
+        for (auto node : nodes) {
+            node->step2_round5();
+        }
+        for (auto node : nodes) {
+            node->step2_round6();
+        }
+        for (auto node : nodes) {
+            node->step2_round7();
         }
     }
 
