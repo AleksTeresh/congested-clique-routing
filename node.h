@@ -59,6 +59,8 @@ private:
 
     std::vector<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
 
+    void add_missing_edges(std::vector<std::vector<int>>& all_messages);
+
     Message* get_message_by_dest_set(int dest);
     // current assumption is that number of nodes in a set is always 2
     // Due to this, the coloring algorithm is trivial

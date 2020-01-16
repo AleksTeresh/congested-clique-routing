@@ -77,8 +77,22 @@ void assert_no_edges(vector<vector<int>>& all_messages, int src_idx) {
     }
 }
 
+void Node::add_missing_edges(vector<vector<int>>& all_messages) {
+    for (int i = 0; i < all_messages.size(); i++) {
+        int count = 0;
+        for (int j = 0; j < all_messages.size(); j++) {
+            count += all_messages[i][j];
+        }
+
+        if (count < set_size * set_size) {
+            all_messages[i][i] = set_size * set_size - count;
+        }
+    }
+}
+
 // the parameter is modified => the vector is copied instead of reference being used
 vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_messages) {
+    add_missing_edges(all_messages);
     vector<vector<vector<int>>> colors(set_size, vector<vector<int>>(set_size, vector<int>()));
 
     int color = -1;
