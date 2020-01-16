@@ -66,6 +66,12 @@ private:
     // Due to this, the coloring algorithm is trivial
     std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>>& all_messages);
 
+    MessageCount* corollary34_create_message_count(
+            std::vector<int>& message_counts,
+            int dest_id, // the MessageCount object will be sent to this node
+            int about_node_id // the MessageCount object will have info about number of messages to be sent from global_idx to about_node_id
+    );
+
     void corollary34_round1(std::vector<int>& message_counts, const std::function<int(int)>& dest_from_inset_node_idx);
 
     void corollary_34_round2();
@@ -75,6 +81,14 @@ private:
     void corollary_34_round4(int current_algo_step);
 
     void prepare_message_for_final_transfer();
+
+    bool node_has_extra_messages_for_set(
+            std::vector<std::vector<int>>& message_counts,
+            int src_node_idx,
+            int dest_node_idx
+    );
+
+    void set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx);
 
     std::vector<std::vector<int>> step3_round3_create_graph(
             std::vector<std::vector<int>>& message_count_per_src_node
