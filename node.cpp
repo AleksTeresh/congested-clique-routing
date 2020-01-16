@@ -1,6 +1,7 @@
 #include <vector>
 #include <unordered_map>
 #include <cmath>
+#include "color.cpp"
 #include "node.h"
 
 using namespace std;
@@ -70,22 +71,35 @@ Message* Node::get_message_by_dest_set(int dest) {
     });
 }
 
-// current assumption is that number of nodes in a set is always 2
-// Due to this, the coloring algorithm is trivial
-vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>>& all_messages) {
+void assert_no_edges(vector<vector<int>>& all_messages, int src_idx) {
+    for (int edges_remaining : all_messages[src_idx]) {
+        assert(edges_remaining == 0);
+    }
+}
+
+// the parameter is modified => the vector is copied instead of reference being used
+vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_messages) {
     vector<vector<vector<int>>> colors(SET_SIZE, vector<vector<int>>(SET_SIZE, vector<int>()));
 
-    // color the graph
-    for (int src_i = 0; src_i < SET_SIZE; src_i++) {
-        int c = src_i % 2 == 0 ? 0 : (nodes.size() - 1);
-        for (int dest_i = 0; dest_i < SET_SIZE; dest_i++) {
-            int message_count = all_messages[src_i][dest_i];
-            for (int message_i = 0; message_i < message_count; message_i++) {
-                colors[src_i][dest_i].push_back(c);
-                c = src_i % 2 == 0 ? (c+1) : (c-1);
+    int color = -1;
+    bool empty = false;
+    while (!empty) {
+        color++;
+        vector<int> matching = max_BPM(all_messages);
+        empty = true;
+
+        for (int i = 0; i < matching.size(); i++) {
+            int matched_pair = matching[i];
+            if (matched_pair == -1) {
+                assert_no_edges(all_messages, i);
+            } else {
+                empty = false;
+                all_messages[i][matched_pair]--;
+                colors[i][matched_pair].push_back(color);
             }
         }
     }
+    assert(color <= SET_SIZE * SET_SIZE);
 
     return colors;
 }

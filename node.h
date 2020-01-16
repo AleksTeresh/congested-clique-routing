@@ -64,7 +64,7 @@ private:
     Message* get_message_by_dest_set(int dest);
     // current assumption is that number of nodes in a set is always 2
     // Due to this, the coloring algorithm is trivial
-    std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>>& all_messages);
+    std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>> all_messages);
 
     MessageCount* corollary34_create_message_count(
             std::vector<int>& message_counts,
