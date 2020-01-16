@@ -4,9 +4,6 @@
 #include <vector>
 #include <cmath>
 
-// TODO: current assumption is that |W| is always 2
-const int SET_SIZE = 2;
-
 struct Message {
     int dest;
     int src;
@@ -42,6 +39,7 @@ private:
     std::vector<Node*> nodes;
 
     int message_sent_count = 0;
+    int set_size = 0;
 
     void start_message_count();
 
