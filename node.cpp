@@ -393,6 +393,8 @@ vector<vector<int>> Node::step3_round3_create_graph(
                     local_src_idx != node_local_idx && // src is not dest
                     node_has_extra_messages_for_set(message_counts, local_src_idx, dest_set_idx)
                 ) {
+                    // TODO: the logic is currently broken. if a message is marked to be sent, corresponding MessageCount
+                    // should be removed to avoid trying to send the same message twice
                     set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx);
                     edge_counts[local_src_idx][node_local_idx]++;
                     curr_messages_to_send++;
