@@ -21,6 +21,17 @@ bool bpm(vector<vector<int>>& bpGraph, int u, vector<bool>& seen, vector<int>& m
     return false;
 }
 
+vector<int> reverse(vector<int> matchR) {
+    vector<int> matchL(matchR.size(), -1);
+
+    for (int i = 0; i < matchR.size(); i++) {
+        if (matchR[i] != -1) {
+            matchL[matchR[i]] = i;
+        }
+    }
+    return matchL;
+}
+
 vector<int> max_BPM(vector<vector<int>>& bp_graph)
 {
     vector<int> matchR(bp_graph.size(), -1);
@@ -31,6 +42,6 @@ vector<int> max_BPM(vector<vector<int>>& bp_graph)
 
         bpm(bp_graph, src, seen, matchR);
     }
-    return matchR;
+    return reverse(matchR);
 }
 
