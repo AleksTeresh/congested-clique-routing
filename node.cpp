@@ -43,9 +43,17 @@ void Node::send_neighbour_message_count(MessageCount* mc, int intermediate_dest)
 }
 
 Message* Node::get_message(const function<bool(Message*)> prerequisite) {
+    return get_message(prerequisite, 0);
+}
+
+Message* Node::get_message(const function<bool(Message*)> prerequisite, int skip_count) {
     for (auto m : messages) {
         if (prerequisite(m)) {
-            return m;
+            if (skip_count > 0) {
+                skip_count--;
+            } else {
+                return m;
+            }
         }
     }
 
@@ -64,11 +72,10 @@ vector<Message*>::iterator Node::get_message_position(const function<bool(Messag
     return messages.end();
 };
 
-Message* Node::get_message_by_dest_set(int dest) {
+Message* Node::get_message_by_dest_set(int dest, int skip_count) {
     return get_message([this, dest](auto m) {
-        return m->next_dest == -1 &&
-                this->get_set_from_node_id(nodes, m->dest) == dest;
-    });
+        return this->get_set_from_node_id(nodes, m->dest) == dest;
+    }, skip_count);
 }
 
 void assert_no_edges(vector<vector<int>>& all_messages, int src_idx) {
@@ -370,9 +377,9 @@ bool Node::node_has_extra_messages_for_set(
     return message_counts[local_src_idx][dest_node_idx] > set_size;
 }
 
-void Node::set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx) {
+void Node::set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx, int skip_count) {
     int global_src_idx = get_nth_node_in_set(get_set_idx(), local_src_idx);
-    auto m = nodes[global_src_idx]->get_message_by_dest_set(message_dest_set_idx);
+    auto m = nodes[global_src_idx]->get_message_by_dest_set(message_dest_set_idx, skip_count);
     m->next_dest = get_nth_node_in_set(get_set_idx(), local_dest_idx);
 }
 
@@ -395,7 +402,7 @@ vector<vector<int>> Node::step3_round3_create_graph(
                 ) {
                     // TODO: the logic is currently broken. if a message is marked to be sent, corresponding MessageCount
                     // should be removed to avoid trying to send the same message twice
-                    set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx);
+                    set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx, edge_counts[local_src_idx][node_local_idx]);
                     edge_counts[local_src_idx][node_local_idx]++;
                     curr_messages_to_send++;
                     message_counts[local_src_idx][dest_set_idx]--;

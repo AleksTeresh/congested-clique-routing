@@ -56,12 +56,13 @@ private:
     void send_neighbour_message_count(MessageCount* mc, int intermediate_dest);
 
     Message* get_message(std::function<bool(Message*)> prerequisite);
+    Message* get_message(std::function<bool(Message*)> prerequisite, int skip_count);
 
     std::vector<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
 
     void add_missing_edges(std::vector<std::vector<int>>& all_messages);
 
-    Message* get_message_by_dest_set(int dest);
+    Message* get_message_by_dest_set(int dest, int skip_count);
     // current assumption is that number of nodes in a set is always 2
     // Due to this, the coloring algorithm is trivial
     std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>> all_messages);
@@ -88,7 +89,7 @@ private:
             int dest_node_idx
     );
 
-    void set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx);
+    void set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx, int skip_count);
 
     std::vector<std::vector<int>> step3_round3_create_graph(
             std::vector<std::vector<int>>& message_count_per_src_node
