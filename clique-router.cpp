@@ -57,11 +57,31 @@ private:
         for (auto node : nodes) {
             node->step3_round2();
         }
+        check_step3_round2_result(nodes);
         for (auto node : nodes) {
             node->step3_round3();
         }
         for (auto node : nodes) {
             node->step3_round4();
+        }
+    }
+
+    void check_step3_round2_result(vector<Node*>& nodes) {
+        for (auto node : nodes) {
+            vector<vector<int>> mcounts(set_size, vector<int>(set_size, 0));
+            auto mcs = node->get_message_counts();
+            assert(mcs.size() == set_size * set_size);
+
+            for (auto mc : mcs) {
+                assert(mc->info_dest == node->get_node_idx()); // the message count is at the destination
+                mcounts[mc->msg_src - node->get_set_idx() * set_size][mc->msg_dest]++;
+            }
+
+            for (int i = 0; i < set_size; i++) {
+                for (int j = 0; j < set_size; j++) {
+                    assert(mcounts[i][j] == 1); // one message count from each node in W about each set W'
+                }
+            }
         }
     }
 
@@ -137,7 +157,7 @@ private:
             }
 
             for (int count : message_per_set_count) {
-                assert(count == set_size);
+                assert(count >= set_size);
             }
         }
     }

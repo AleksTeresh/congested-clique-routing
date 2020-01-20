@@ -43,17 +43,9 @@ void Node::send_neighbour_message_count(MessageCount* mc, int intermediate_dest)
 }
 
 Message* Node::get_message(const function<bool(Message*)> prerequisite) {
-    return get_message(prerequisite, 0);
-}
-
-Message* Node::get_message(const function<bool(Message*)> prerequisite, int skip_count) {
     for (auto m : messages) {
         if (prerequisite(m)) {
-            if (skip_count > 0) {
-                skip_count--;
-            } else {
-                return m;
-            }
+            return m;
         }
     }
 
@@ -72,10 +64,10 @@ vector<Message*>::iterator Node::get_message_position(const function<bool(Messag
     return messages.end();
 };
 
-Message* Node::get_message_by_dest_set(int dest, int skip_count) {
+Message* Node::get_message_by_dest_set(int dest) {
     return get_message([this, dest](auto m) {
-        return this->get_set_from_node_id(nodes, m->dest) == dest;
-    }, skip_count);
+        return this->get_set_from_node_id(nodes, m->dest) == dest && m->next_dest == -1;
+    });
 }
 
 void assert_no_edges(vector<vector<int>>& all_messages, int src_idx) {
@@ -247,6 +239,10 @@ vector<Message*>& Node::get_messages() {
     return messages;
 }
 
+vector<MessageCount*>& Node::get_message_counts() {
+    return neighbour_message_count;
+}
+
 void Node::add_messages(vector<int>& new_messages) {
     for (int message : new_messages) {
         add_message(message);
@@ -377,14 +373,17 @@ bool Node::node_has_extra_messages_for_set(
     return message_counts[local_src_idx][dest_node_idx] > set_size;
 }
 
-void Node::set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx, int skip_count) {
+void Node::set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx) {
     int global_src_idx = get_nth_node_in_set(get_set_idx(), local_src_idx);
-    auto m = nodes[global_src_idx]->get_message_by_dest_set(message_dest_set_idx, skip_count);
-    m->next_dest = get_nth_node_in_set(get_set_idx(), local_dest_idx);
+
+    if (global_src_idx == global_idx) {
+        auto m = get_message_by_dest_set(message_dest_set_idx);
+        m->next_dest = get_nth_node_in_set(get_set_idx(), local_dest_idx);
+    }
 }
 
 vector<vector<int>> Node::step3_round3_create_graph(
-        vector<vector<int>>& message_counts // message counts from a node to a set W'
+        vector<vector<int>>& message_counts // message counts from a node in W to a set W'
 ) {
     vector<vector<int>> edge_counts(set_size, vector<int>(set_size, 0));
     for (int dest_set_idx = 0; dest_set_idx < set_size; dest_set_idx++) { // for each destination set W'
@@ -400,12 +399,11 @@ vector<vector<int>> Node::step3_round3_create_graph(
                     local_src_idx != node_local_idx && // src is not dest
                     node_has_extra_messages_for_set(message_counts, local_src_idx, dest_set_idx)
                 ) {
-                    // TODO: the logic is currently broken. if a message is marked to be sent, corresponding MessageCount
-                    // should be removed to avoid trying to send the same message twice
-                    set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx, edge_counts[local_src_idx][node_local_idx]);
+                    set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx);
                     edge_counts[local_src_idx][node_local_idx]++;
-                    curr_messages_to_send++;
+                    message_counts[node_local_idx][dest_set_idx]++;
                     message_counts[local_src_idx][dest_set_idx]--;
+                    curr_messages_to_send = message_counts[node_local_idx][dest_set_idx];
                 }
 
                 local_src_idx = (local_src_idx + 1) % set_size;
