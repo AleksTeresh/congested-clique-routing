@@ -66,7 +66,13 @@ vector<Message*>::iterator Node::get_message_position(const function<bool(Messag
 
 Message* Node::get_message_by_dest_set(int dest) {
     return get_message([this, dest](auto m) {
-        return this->get_set_from_node_id(nodes, m->dest) == dest && m->next_dest == -1;
+        return this->get_set_from_node_id(nodes, m->dest) == dest && m->next_dest == -1 && m->next_set == -1;
+    });
+}
+
+Message* Node::get_message_by_next_set(int next_set_idx) {
+    return get_message([this, next_set_idx](auto m) {
+        return m->next_set == next_set_idx && m->next_dest == -1;
     });
 }
 
@@ -76,22 +82,26 @@ void assert_no_edges(vector<vector<int>>& all_messages, int src_idx) {
     }
 }
 
-void Node::add_missing_edges(vector<vector<int>>& all_messages) {
+void Node::add_missing_edges(vector<vector<int>>& all_messages, int degree) {
     for (int i = 0; i < all_messages.size(); i++) {
         int count = 0;
         for (int j = 0; j < all_messages.size(); j++) {
             count += all_messages[i][j];
         }
 
-        if (count < set_size * set_size) {
-            all_messages[i][i] = set_size * set_size - count;
+        if (count < degree) {
+            all_messages[i][i] = degree - count;
         }
     }
 }
 
-// the parameter is modified => the vector is copied instead of reference being used
 vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_messages) {
-    add_missing_edges(all_messages);
+    return get_graph_coloring(all_messages, set_size * set_size);
+}
+
+// the parameter is modified => the vector is copied instead of reference being used
+vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_messages, int degree) {
+    add_missing_edges(all_messages, degree);
     vector<vector<vector<int>>> colors(set_size, vector<vector<int>>(set_size, vector<int>()));
 
     int color = -1;
@@ -112,7 +122,7 @@ vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_mes
             }
         }
     }
-    assert(color <= set_size * set_size);
+    assert(color <= degree);
 
     return colors;
 }
@@ -181,6 +191,8 @@ void Node::send_message_to_color(int color, int dest_of_message, int curr_algo_s
         auto message = *pos;
         send_message(message, color, curr_algo_step);
         pos = messages.erase(pos);
+    } else {
+        assert(1 == 0);
     }
 }
 
@@ -194,6 +206,8 @@ void Node::send_message_to_itself(int dest_of_message, int curr_algo_step) {
 
     if (message != nullptr) {
         message->step_to_be_sent = curr_algo_step;
+    } else {
+        assert(1 == 0);
     }
 }
 
@@ -309,7 +323,7 @@ void Node::step2_round2() {
         auto mc = *it;
         if (mc->msg_src == get_set_idx() && mc->info_dest == -1) {
             int dest_set_idx = mc->msg_dest;
-            message_counts[dest_set_idx]++;
+            message_counts[dest_set_idx] += mc->msg_count;
             it = neighbour_message_count.erase(it);
         } else {
             it++;
@@ -317,7 +331,7 @@ void Node::step2_round2() {
     }
 
     for (auto node : nodes) {
-        int i = get_node_idx_in_set(global_idx);
+        int i = get_node_idx_in_set(global_idx); // stands for destination set idx
         auto mc = new MessageCount(
                 get_set_idx(),
                 i,
@@ -329,23 +343,135 @@ void Node::step2_round2() {
 }
 
 void Node::step2_round3() {
-    // TODO: Algorithm 2
+    vector<vector<int>> message_count( // from set W to set W'
+            set_size,
+            vector<int>(set_size, 0)
+    );
+
+    for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
+        auto mc = *it;
+        int src_set_idx = mc->msg_src;
+        int dest_set_idx = mc->msg_dest;
+        message_count[src_set_idx][dest_set_idx] = mc->msg_count;
+        it = neighbour_message_count.erase(it);
+    }
+
+    vector<vector<vector<int>>> coloring = get_graph_coloring(message_count, set_size * set_size * set_size);
+    this->step2_coloring = coloring;
+
+//    vector<int> message_count_this_node( // from set W to set W'
+//            set_size,
+//            0
+//    );
+//    vector<int> message_count2( // from current set to set W'
+//            set_size,
+//            0
+//    );
+//    for (int j = 0; j < set_size; j++) {
+//        for (auto c : coloring[get_set_idx()][j]) {
+//            int new_dest_set = c % set_size;
+//            message_count2[new_dest_set]++; // how much THIS set needs to send to dest_set
+//        }
+//    }
+}
+
+void Node::step2_round35() {
+    vector<int> message_counts(set_size, 0);
+
+    for (auto message : messages) {
+        message_counts[get_set_from_node_id(nodes, message->dest)]++;
+    }
+
+    corollary34_round1(
+            message_counts,
+            [](int inset_node_idx) { return inset_node_idx; }
+    );
 }
 
 void Node::step2_round4() {
-    // TODO: Algorithm 2
+    corollary_34_round2();
 }
 
 void Node::step2_round5() {
-    // TODO: Algorithm 2
+    vector<vector<int>> final_message_count( // from node i in W to set W'
+            set_size,
+            vector<int>(set_size, 0)
+    );
+    for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
+        auto mc = *it;
+        int src_idx = get_node_idx_in_set(mc->msg_src);
+        int dest_set_idx = mc->msg_dest;
+        final_message_count[src_idx][dest_set_idx] = mc->msg_count;
+        it = neighbour_message_count.erase(it);
+    }
+
+    vector<vector<int>> message_count( // from node i in W to set W'
+            set_size,
+            vector<int>(set_size, 0)
+    );
+    for (int final_dest_set = 0; final_dest_set < set_size; final_dest_set++) {
+        for (auto c : step2_coloring[get_set_idx()][final_dest_set]) {
+            int intermediate_dest_set = c % set_size;
+
+            int local_src_idx = 0;
+            while (true) {
+                if (final_message_count[local_src_idx][final_dest_set] > 0) { // we found a source for this particular color
+                    set_next_set_to_message(final_dest_set, local_src_idx, intermediate_dest_set);
+                    message_count[local_src_idx][intermediate_dest_set]++;
+                    final_message_count[local_src_idx][final_dest_set]--;
+                    break;
+                }
+                local_src_idx++;
+            }
+        }
+    }
+    vector<vector<vector<int>>> coloring = get_graph_coloring(message_count); // graph of degree set_size * set_size => n colors used
+
+    vector<vector<int>> edge_counts(set_size, vector<int>(set_size, 0));
+    for (int local_src_idx = 0; local_src_idx < set_size; local_src_idx++) {
+        for (int dest_set_idx = 0; dest_set_idx < set_size; dest_set_idx++) {
+            for (auto c : coloring[local_src_idx][dest_set_idx]) {
+                int local_dest_idx = c % set_size;
+                set_next_dest_to_message_by_next_set(dest_set_idx, local_src_idx, local_dest_idx);
+                edge_counts[local_src_idx][local_dest_idx]++;
+            }
+        }
+    }
+
+
+    corollary_34_round3(edge_counts, 2);
 }
 
-void Node::step2_round6() {
-    // TODO: Algorithm 2
+void Node::step2_round6() { // send messages within W only as needed
+    corollary_34_round4(2);
 }
 
-void Node::step2_round7() {
-    // TODO: Algorithm 2
+void Node::step2_round7() { // each node in in W sends one message to each node
+    vector<int> next_dest_idx_for_sets(set_size, 0);
+
+    start_message_count();
+    for (auto i = messages.begin(); i != messages.end();) {
+        auto message = *i;
+        if (message->next_set == -1) { // already sent
+            i++;
+            continue;
+        }
+
+        int next_set = message->next_set;
+        int inset_dest_idx = next_dest_idx_for_sets[next_set];
+        int global_dest_idx = get_nth_node_in_set(next_set, inset_dest_idx);
+
+        message->next_set = -1;
+        if (global_dest_idx != global_idx) {
+            send_message(message, global_dest_idx, 0);
+            i = messages.erase(i);
+        } else {
+            i++;
+        }
+
+        next_dest_idx_for_sets[next_set]++;
+    }
+    check_message_count();
 }
 
 void Node::step3_round1() {
@@ -373,11 +499,37 @@ bool Node::node_has_extra_messages_for_set(
     return message_counts[local_src_idx][dest_node_idx] > set_size;
 }
 
-void Node::set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx) {
+void Node::set_next_dest_to_message(
+        int message_dest_set_idx, // how to find
+        int local_src_idx, // from where
+        int local_dest_idx // next dest
+) {
     int global_src_idx = get_nth_node_in_set(get_set_idx(), local_src_idx);
 
     if (global_src_idx == global_idx) {
         auto m = get_message_by_dest_set(message_dest_set_idx);
+        m->next_dest = get_nth_node_in_set(get_set_idx(), local_dest_idx);
+    }
+}
+
+void Node::set_next_set_to_message(int final_dest_set, int local_src_idx, int intermediate_dest_set) {
+    int global_src_idx = get_nth_node_in_set(get_set_idx(), local_src_idx);
+
+    if (global_src_idx == global_idx) {
+        auto m = get_message_by_dest_set(final_dest_set);
+        m->next_set = intermediate_dest_set;
+    }
+}
+
+void Node::set_next_dest_to_message_by_next_set(
+        int dest_set_idx, // how to find
+        int local_src_idx, // from where
+        int local_dest_idx // next dest
+) {
+    int global_src_idx = get_nth_node_in_set(get_set_idx(), local_src_idx);
+
+    if (global_src_idx == global_idx) {
+        auto m = get_message_by_next_set(dest_set_idx);
         m->next_dest = get_nth_node_in_set(get_set_idx(), local_dest_idx);
     }
 }
@@ -439,6 +591,13 @@ void Node::clear_neighbour_mcs() {
     neighbour_message_count = vector<MessageCount*>();
 }
 
+void Node::reset_message_next_dest() {
+    for (auto m : messages) {
+        m->next_set = -1;
+        m->next_dest = -1;
+    }
+}
+
 void Node::send_cross_set() {
     int src_set_idx = get_set_idx();
 
@@ -494,7 +653,7 @@ void Node::prepare_message_for_final_transfer() {
     for (auto i = messages.begin(); i != messages.end();) {
         auto message = *i;
         message->next_dest = message->dest;
-        message->step_to_be_sent = 5;
+        message->step_to_be_sent = -1;
         i++;
     }
 }
@@ -508,7 +667,7 @@ void Node::send_within_set_round3() {
         edge_counts[src_local_idx][dest_local_idx] = mc->msg_count;
     }
 
-    prepare_message_for_final_transfer();
+    // prepare_message_for_final_transfer();
     corollary_34_round3(edge_counts, 5);
 }
 

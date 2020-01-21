@@ -10,6 +10,7 @@ struct Message {
 
     int step_to_be_sent = 0;
     int next_dest = -1;
+    int next_set = -1;
 
     Message(int src, int dest) {
         this->src = src;
@@ -37,6 +38,7 @@ private:
     std::vector<Message*> messages;
     std::vector<MessageCount*> neighbour_message_count;
     std::vector<Node*> nodes;
+    std::vector<std::vector<std::vector<int>>> step2_coloring;
 
     int message_sent_count = 0;
     int set_size = 0;
@@ -59,12 +61,13 @@ private:
 
     std::vector<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
 
-    void add_missing_edges(std::vector<std::vector<int>>& all_messages);
+    void add_missing_edges(std::vector<std::vector<int>>& all_messages, int degree);
 
     Message* get_message_by_dest_set(int dest);
-    // current assumption is that number of nodes in a set is always 2
-    // Due to this, the coloring algorithm is trivial
+    Message* get_message_by_next_set(int next_set_idx);
+
     std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>> all_messages);
+    std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>> all_messages, int degree);
 
     MessageCount* corollary34_create_message_count(
             std::vector<int>& message_counts,
@@ -80,8 +83,6 @@ private:
 
     void corollary_34_round4(int current_algo_step);
 
-    void prepare_message_for_final_transfer();
-
     bool node_has_extra_messages_for_set(
             std::vector<std::vector<int>>& message_counts,
             int src_node_idx,
@@ -89,6 +90,12 @@ private:
     );
 
     void set_next_dest_to_message(int message_dest_set_idx, int local_src_idx, int local_dest_idx);
+    void set_next_set_to_message(int final_dest_set, int local_src_idx, int intermediate_dest_set);
+    void set_next_dest_to_message_by_next_set(
+            int dest_set_idx, // how to find
+            int local_src_idx, // from where
+            int local_dest_idx // next dest
+    );
 
     std::vector<std::vector<int>> step3_round3_create_graph(
             std::vector<std::vector<int>>& message_count_per_src_node
@@ -131,6 +138,7 @@ public:
     void step2_round1();
     void step2_round2();
     void step2_round3();
+    void step2_round35();
     void step2_round4();
     void step2_round5();
     void step2_round6();
@@ -142,6 +150,8 @@ public:
     void step3_round4();
 
     void clear_neighbour_mcs();
+    void reset_message_next_dest();
+    void prepare_message_for_final_transfer();
 
     void send_cross_set();
 

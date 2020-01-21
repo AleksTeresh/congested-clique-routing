@@ -19,6 +19,7 @@ private:
 
         for (auto node : nodes) {
             node->clear_neighbour_mcs();
+            node->reset_message_next_dest();
         }
 
         for (auto node : nodes) {
@@ -29,6 +30,9 @@ private:
         }
         for (auto node : nodes) {
             node->step2_round3();
+        }
+        for (auto node : nodes) {
+            node->step2_round35();
         }
         for (auto node : nodes) {
             node->step2_round4();
@@ -49,6 +53,7 @@ private:
 
         for (auto node : nodes) {
             node->clear_neighbour_mcs();
+            node->reset_message_next_dest();
         }
 
         for (auto node : nodes) {
@@ -96,6 +101,7 @@ private:
         check_precondition_for_step_5(nodes);
         for (auto node : nodes) {
             node->clear_neighbour_mcs();
+            node->prepare_message_for_final_transfer();
         }
         for (auto node : nodes) {
             node->send_within_set_round1();
@@ -157,7 +163,7 @@ private:
             }
 
             for (int count : message_per_set_count) {
-                assert(count >= set_size);
+                assert(count == set_size);
             }
         }
     }
