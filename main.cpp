@@ -1,3 +1,5 @@
+#include <random>
+#include <iostream>
 #include "clique-router.cpp"
 
 void check_arrived_messages(vector<Node*>& nodes) {
@@ -303,6 +305,37 @@ int test7() {
     return 0;
 }
 
+void random_test(int subset_size) {
+    int set_size = subset_size * subset_size;
+    vector<vector<int>> message_destinations(set_size, vector<int>());
+
+    random_device dev;
+    mt19937 rng(dev());
+    uniform_int_distribution<mt19937::result_type> dist(0,set_size - 1); // distribution in range [0, set_size - 1]
+
+    for (int i = 0; i < set_size; i++) {
+        for (int dest = 0; dest < set_size; dest++) {
+            int node_idx = dist(rng);
+            while (message_destinations[node_idx].size() >= set_size) {
+                node_idx = dist(rng);
+            }
+            message_destinations[node_idx].push_back(dest);
+        }
+    }
+
+    vector<Node*> nodes;
+    for (int i = 0; i < set_size; i++) {
+        auto n = new Node(i);
+        n->add_messages(message_destinations[i]);
+        nodes.push_back(n);
+    }
+
+    CliqueRouter cr;
+    cr.route(nodes);
+
+    check_arrived_messages(nodes);
+}
+
 int main() {
     test1();
     test2();
@@ -310,6 +343,17 @@ int main() {
     test4();
     test5();
     test6();
-
     test7();
+
+    setbuf(stdout, nullptr);
+    int test_count_per_size = 4;
+    int max_size = 11;
+    for (int i = 1; i <= max_size; i++) { // subset size
+        printf("Started %d tests with %d nodes\n", test_count_per_size, i*i);
+        for (int j = 0; j < test_count_per_size; j++) {
+            random_test(i);
+        }
+    }
+
+    return 0;
 }
