@@ -358,21 +358,6 @@ void Node::step2_round3() {
 
     vector<vector<vector<int>>> coloring = get_graph_coloring(message_count, set_size * set_size * set_size);
     this->step2_coloring = coloring;
-
-//    vector<int> message_count_this_node( // from set W to set W'
-//            set_size,
-//            0
-//    );
-//    vector<int> message_count2( // from current set to set W'
-//            set_size,
-//            0
-//    );
-//    for (int j = 0; j < set_size; j++) {
-//        for (auto c : coloring[get_set_idx()][j]) {
-//            int new_dest_set = c % set_size;
-//            message_count2[new_dest_set]++; // how much THIS set needs to send to dest_set
-//        }
-//    }
 }
 
 void Node::step2_round35() {
@@ -667,7 +652,6 @@ void Node::send_within_set_round3() {
         edge_counts[src_local_idx][dest_local_idx] = mc->msg_count;
     }
 
-    // prepare_message_for_final_transfer();
     corollary_34_round3(edge_counts, 5);
 }
 
