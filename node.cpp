@@ -360,7 +360,7 @@ void Node::step2_round3() {
     this->step2_coloring = coloring;
 }
 
-void Node::step2_round35() {
+void Node::step2_round4() {
     vector<int> message_counts(set_size, 0);
 
     for (auto message : messages) {
@@ -373,11 +373,11 @@ void Node::step2_round35() {
     );
 }
 
-void Node::step2_round4() {
+void Node::step2_round5() {
     corollary_34_round2();
 }
 
-void Node::step2_round5() {
+void Node::step2_round6() {
     vector<vector<int>> final_message_count( // from node i in W to set W'
             set_size,
             vector<int>(set_size, 0)
@@ -423,15 +423,14 @@ void Node::step2_round5() {
         }
     }
 
-
     corollary_34_round3(edge_counts, 2);
 }
 
-void Node::step2_round6() { // send messages within W only as needed
+void Node::step2_round7() { // send messages within W only as needed
     corollary_34_round4(2);
 }
 
-void Node::step2_round7() { // each node in in W sends one message to each node
+void Node::step2_round8() { // each node in in W sends one message to each node
     vector<int> next_dest_idx_for_sets(set_size, 0);
 
     start_message_count();

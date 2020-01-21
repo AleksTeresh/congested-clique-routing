@@ -32,9 +32,6 @@ private:
             node->step2_round3();
         }
         for (auto node : nodes) {
-            node->step2_round35();
-        }
-        for (auto node : nodes) {
             node->step2_round4();
         }
         for (auto node : nodes) {
@@ -45,6 +42,9 @@ private:
         }
         for (auto node : nodes) {
             node->step2_round7();
+        }
+        for (auto node : nodes) {
+            node->step2_round8();
         }
     }
 

@@ -1,5 +1,5 @@
 #include <random>
-#include <iostream>
+#include "node.cpp"
 #include "clique-router.cpp"
 
 void check_arrived_messages(vector<Node*>& nodes) {
