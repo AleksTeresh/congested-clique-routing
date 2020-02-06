@@ -43,7 +43,7 @@ void Node::send_message_counts(unique_ptr<MessageCount> mc, int intermediate_des
     message_sent_count++;
 }
 
-Message& Node::get_message(const function<bool(Message&)> prerequisite) {
+Message& Node::get_message(const function<bool(Message&)>& prerequisite) {
     for (auto& m : messages) {
         if (prerequisite(*m)) {
             return *m;
@@ -53,7 +53,7 @@ Message& Node::get_message(const function<bool(Message&)> prerequisite) {
     throw logic_error("No message was found with required prerequisite.");
 }
 
-Vec<unique_ptr<Message>>::iterator Node::get_message_pos(const function<bool(Message&)> prerequisite) {
+Vec<unique_ptr<Message>>::iterator Node::get_message_pos(const function<bool(Message&)>& prerequisite) {
     for (auto it = messages.begin(); it != messages.end();) {
         if (prerequisite(**it)) {
             return it;

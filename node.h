@@ -72,9 +72,9 @@ private:
 
     void send_message_counts(std::unique_ptr<MessageCount> mc, int intermediate_dest);
 
-    Message& get_message(std::function<bool(Message&)> prerequisite);
+    Message& get_message(const std::function<bool(Message&)>& prerequisite);
 
-    Vec<std::unique_ptr<Message>>::iterator get_message_pos(std::function<bool(Message&)> prerequisite);
+    Vec<std::unique_ptr<Message>>::iterator get_message_pos(const std::function<bool(Message&)>& prerequisite);
 
     void add_missing_edges(Vec2<int>& all_messages, int degree);
 
