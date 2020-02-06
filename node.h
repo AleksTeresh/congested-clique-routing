@@ -52,7 +52,7 @@ private:
     int global_idx;
     Vec<std::unique_ptr<Message>> messages;
     Vec<std::unique_ptr<MessageCount>> received_message_counts;
-    Vec<std::shared_ptr<Node>> nodes; // list of all nodes in the clique
+    Vec<std::weak_ptr<Node>> nodes; // list of all nodes in the clique
     Vec3<int> step2_coloring;
 
     int message_sent_count = 0; // number of messages sent during a single round
@@ -125,8 +125,13 @@ public:
         this->global_idx = global_idx;
     }
 
+    static int get_set_from_node_id(Vec<std::weak_ptr<Node>>& nodes, int node_id) {
+        return get_set_from_node_id(nodes.size(), node_id);
+    }
     static int get_set_from_node_id(Vec<std::shared_ptr<Node>>& nodes, int node_id) {
-        int node_count = nodes.size();
+        return get_set_from_node_id(nodes.size(), node_id);
+    }
+    static int get_set_from_node_id(int node_count, int node_id) {
         int set_count = sqrt(node_count);
         return node_id / set_count;
     }

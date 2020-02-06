@@ -34,12 +34,12 @@ int Node::get_global_id_from_local(int set_idx, int node_idx) {
 void Node::send_message(unique_ptr<Message> message, int intermediate_dest, int step_to_be_sent) {
     assert(message->src == global_idx); // a node can call send_message only on itself
     message->step_to_be_sent = step_to_be_sent;
-    (*nodes[intermediate_dest]).add_message(move(message));
+    nodes[intermediate_dest].lock()->add_message(move(message));
     message_sent_count++;
 }
 
 void Node::send_message_counts(unique_ptr<MessageCount> mc, int intermediate_dest) {
-    nodes[intermediate_dest]->add_received_message_count(move(mc));
+    nodes[intermediate_dest].lock()->add_received_message_count(move(mc));
     message_sent_count++;
 }
 
@@ -289,7 +289,7 @@ void Node::add_received_message_count(unique_ptr<MessageCount> mc) {
 
 void Node::init(Vec<shared_ptr<Node>>& nodes_to_init) {
     set_size = sqrt(nodes_to_init.size());
-    nodes = Vec<shared_ptr<Node>>();
+    nodes = Vec<weak_ptr<Node>>();
     for (const auto& node : nodes_to_init) {
         nodes.push_back(node);
     }
@@ -334,13 +334,14 @@ void Node::step2_round2() {
 
     for (auto& node : nodes) {
         int i = get_local_id_from_global(global_idx); // stands for destination set idx
+        auto locked_node = node.lock();
         auto mc = make_unique<MessageCount>(
                 get_set_idx(),
                 i,
                 message_counts[i],
-                node->get_node_idx()
+                locked_node->get_node_idx()
         );
-        send_message_counts(move(mc), node->get_node_idx());
+        send_message_counts(move(mc), locked_node->get_node_idx());
     }
 }
 
