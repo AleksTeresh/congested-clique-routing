@@ -63,17 +63,17 @@ private:
 
     void check_message_count(int max_size);
 
-    int get_node_idx_in_set(int node_id);
+    int get_local_id_from_global(int node_id);
 
-    int get_nth_node_in_set(int set_idx, int node_idx);
+    int get_global_id_from_local(int set_idx, int node_idx);
 
     void send_message(Message* message, int intermediate_dest, int step_to_be_sent);
 
-    void send_neighbour_message_count(MessageCount* mc, int intermediate_dest);
+    void send_message_counts(MessageCount* mc, int intermediate_dest);
 
     Message* get_message(std::function<bool(Message*)> prerequisite);
 
-    Vec<Message*>::iterator get_message_position(std::function<bool(Message*)> prerequisite);
+    Vec<Message*>::iterator get_message_pos(const std::function<bool(Message *)> prerequisite);
 
     void add_missing_edges(Vec2<int>& all_messages, int degree);
 
