@@ -1,4 +1,5 @@
 #include <random>
+#include <cassert>
 #include "node.cpp"
 #include "clique-router.cpp"
 

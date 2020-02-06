@@ -2,6 +2,7 @@
 #define CONGESTED_CLIQUE_ROUTING_NODE_H
 
 #include <vector>
+#include <functional>
 #include <cmath>
 
 struct Message {
