@@ -93,7 +93,7 @@ void Node::add_missing_edges(Vec2<int>& all_messages, int degree) {
             count += all_messages[i][j];
         });
 
-        if (count < degree) {
+        if (count < degree) { // if not enough edges for the graph to be regular, add the difference
             all_messages[i][i] = degree - count;
         }
     });
@@ -103,7 +103,7 @@ Vec3<int> Node::get_graph_coloring(Vec2<int>& all_messages) {
     return get_graph_coloring(all_messages, set_size * set_size);
 }
 
-// since the graph is regular bipartite, color it by repeatedly finding perfect matching
+// since the graph is regular bipartite, we can color it by repeatedly finding perfect matching
 // the vector is copied because in-place mutation is used
 Vec3<int> Node::get_graph_coloring(Vec2<int> all_messages, int degree) {
     add_missing_edges(all_messages, degree);
@@ -523,32 +523,59 @@ void Node::set_next_dest_to_message_by_next_set(
     }
 }
 
+void Node::update_counts(
+    Vec2<int>& message_counts, // message counts from a node in W to a set W'
+    Vec2<int>& edge_counts,
+    int node_local_idx,
+    int local_src_idx,
+    int dest_set_idx
+) {
+    edge_counts[local_src_idx][node_local_idx]++;
+    message_counts[node_local_idx][dest_set_idx]++;
+    message_counts[local_src_idx][dest_set_idx]--;
+}
+
+void Node::find_missing_messages(
+    Vec2<int>& message_counts, // message counts from a node in W to a set W'
+    Vec2<int>& edge_counts,
+    int node_local_idx,
+    int dest_set_idx
+) {
+    int& curr_messages_to_send = message_counts[node_local_idx].at(dest_set_idx);
+    int local_src_idx = 0;
+    // while the node still needs more message with destination in set W'
+    // find the message from other nodes in set W and send them to the node
+    while (curr_messages_to_send < set_size) {
+        if (
+            local_src_idx != node_local_idx && // src is not dest
+            node_has_extra_messages_for_set(message_counts, local_src_idx, dest_set_idx)
+        ) {
+            set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx);
+            update_counts(
+                    message_counts,
+                    edge_counts,
+                    node_local_idx,
+                    local_src_idx,
+                    dest_set_idx);
+        }
+
+        local_src_idx = (local_src_idx + 1) % set_size;
+    }
+}
+
 Vec2<int> Node::step3_round3_create_graph(
         Vec2<int>& message_counts // message counts from a node in W to a set W'
 ) {
     Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
 
     loop(set_size, [&](int dest_set_idx) { // for each destination set W'
-        // for each node in current set W, make sure that it has set_size of messages with destination in W'
         loop(set_size, [&](int node_local_idx) {
-            int curr_messages_to_send = message_counts[node_local_idx][dest_set_idx];
-            int local_src_idx = 0;
-            // while the node still needs more message with destination in set W'
-            // find the message from other nodes in set W and send them to the node
-            while (curr_messages_to_send < set_size) {
-                if (
-                        local_src_idx != node_local_idx && // src is not dest
-                        node_has_extra_messages_for_set(message_counts, local_src_idx, dest_set_idx)
-                        ) {
-                    set_next_dest_to_message(dest_set_idx, local_src_idx, node_local_idx);
-                    edge_counts[local_src_idx][node_local_idx]++;
-                    message_counts[node_local_idx][dest_set_idx]++;
-                    message_counts[local_src_idx][dest_set_idx]--;
-                    curr_messages_to_send = message_counts[node_local_idx][dest_set_idx];
-                }
-
-                local_src_idx = (local_src_idx + 1) % set_size;
-            }
+            // for each node in current set W, make sure that it has set_size messages with destination in W'
+            find_missing_messages(
+                    message_counts,
+                    edge_counts,
+                    node_local_idx,
+                    dest_set_idx);
         });
     });
     return edge_counts;
@@ -587,6 +614,7 @@ void Node::reset_message_next_dest() {
     }
 }
 
+// step 4
 void Node::send_cross_set() {
     int src_set_idx = get_set_idx();
 
@@ -613,6 +641,18 @@ void Node::send_cross_set() {
     check_message_count();
 }
 
+// prepare messages for the last 2 rounds of Step 5 Algorithm 1
+// sets next_dest to equal final_dest
+void Node::prepare_message_for_final_transfer() {
+    for (auto i = messages.begin(); i != messages.end();) {
+        auto& message = *i;
+        message->next_dest = message->final_dest;
+        message->step_to_be_sent = -1;
+        i++;
+    }
+}
+
+// step 5 round 1
 void Node::send_within_set_round1() {
     Vec<int> message_counts(nodes.size(), 0);
     message_counts.resize(nodes.size());
@@ -632,21 +672,12 @@ void Node::send_within_set_round1() {
     );
 }
 
-// step 2 of Corollary 3.4
+// step 5 round 2
 void Node::send_within_set_round2() {
     corollary_34_round2();
 }
 
-// prepare messages for the last 2 rounds of Step 5 Algorithm 1
-void Node::prepare_message_for_final_transfer() {
-    for (auto i = messages.begin(); i != messages.end();) {
-        auto& message = *i;
-        message->next_dest = message->final_dest;
-        message->step_to_be_sent = -1;
-        i++;
-    }
-}
-
+// step 5 round 3
 void Node::send_within_set_round3() {
     Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
 
@@ -659,6 +690,7 @@ void Node::send_within_set_round3() {
     corollary_34_round3(edge_counts, 5);
 }
 
+// step 5 round 4
 void Node::send_within_set_round4() {
     corollary_34_round4(5);
 }

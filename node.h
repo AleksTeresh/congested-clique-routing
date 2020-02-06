@@ -112,6 +112,19 @@ private:
             int local_dest_idx // next dest
     );
 
+    void update_counts(
+            Vec2<int>& message_counts, // message counts from a node in W to a set W'
+            Vec2<int>& edge_counts,
+            int node_local_idx,
+            int local_src_idx,
+            int dest_set_idx
+    );
+    void find_missing_messages(
+            Vec2<int>& message_counts, // message counts from a node in W to a set W'
+            Vec2<int>& edge_counts,
+            int node_local_idx,
+            int dest_set_idx
+    );
     Vec2<int> step3_round3_create_graph(
             Vec2<int>& message_count_per_src_node
     );
