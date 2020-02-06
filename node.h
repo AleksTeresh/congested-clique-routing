@@ -5,6 +5,13 @@
 #include <functional>
 #include <cmath>
 
+template<class T>
+using Vec = std::vector<T>;
+template<class T>
+using Vec2 = std::vector<std::vector<T>>;
+template<class T>
+using Vec3 = std::vector<std::vector<std::vector<T>>>;
+
 struct Message {
     int dest;
     int src;
@@ -36,10 +43,10 @@ struct MessageCount {
 class Node {
 private:
     int global_idx;
-    std::vector<Message*> messages;
-    std::vector<MessageCount*> neighbour_message_count;
-    std::vector<Node*> nodes;
-    std::vector<std::vector<std::vector<int>>> step2_coloring;
+    Vec<Message*> messages;
+    Vec<MessageCount*> neighbour_message_count;
+    Vec<Node*> nodes;
+    Vec3<int> step2_coloring;
 
     int message_sent_count = 0;
     int set_size = 0;
@@ -60,32 +67,32 @@ private:
 
     Message* get_message(std::function<bool(Message*)> prerequisite);
 
-    std::vector<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
+    Vec<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
 
-    void add_missing_edges(std::vector<std::vector<int>>& all_messages, int degree);
+    void add_missing_edges(Vec2<int>& all_messages, int degree);
 
     Message* get_message_by_dest_set(int dest);
     Message* get_message_by_next_set(int next_set_idx);
 
-    std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>> all_messages);
-    std::vector<std::vector<std::vector<int>>> get_graph_coloring(std::vector<std::vector<int>> all_messages, int degree);
+    Vec3<int> get_graph_coloring(Vec2<int> all_messages);
+    Vec3<int> get_graph_coloring(Vec2<int> all_messages, int degree);
 
     MessageCount* corollary34_create_message_count(
-            std::vector<int>& message_counts,
+            Vec<int>& message_counts,
             int dest_id, // the MessageCount object will be sent to this node
             int about_node_id // the MessageCount object will have info about number of messages to be sent from global_idx to about_node_id
     );
 
-    void corollary34_round1(std::vector<int>& message_counts, const std::function<int(int)>& dest_from_inset_node_idx);
+    void corollary34_round1(Vec<int>& message_counts, const std::function<int(int)>& dest_from_inset_node_idx);
 
     void corollary_34_round2();
 
-    void corollary_34_round3(std::vector<std::vector<int>>& edge_counts, int current_algo_step);
+    void corollary_34_round3(Vec2<int>& edge_counts, int current_algo_step);
 
     void corollary_34_round4(int current_algo_step);
 
     bool node_has_extra_messages_for_set(
-            std::vector<std::vector<int>>& message_counts,
+            Vec2<int>& message_counts,
             int src_node_idx,
             int dest_node_idx
     );
@@ -98,8 +105,8 @@ private:
             int local_dest_idx // next dest
     );
 
-    std::vector<std::vector<int>> step3_round3_create_graph(
-            std::vector<std::vector<int>>& message_count_per_src_node
+    Vec2<int> step3_round3_create_graph(
+            Vec2<int>& message_count_per_src_node
     );
 
     void send_message_to_color(int color, int dest_of_message, int curr_algo_step);
@@ -111,18 +118,18 @@ public:
         this->global_idx = global_idx;
     }
 
-    std::vector<Message*>& get_messages();
+    Vec<Message*>& get_messages();
 
-    std::vector<MessageCount*>& get_message_counts();
+    Vec<MessageCount*>& get_message_counts();
 
-    static int get_set_from_node_id(std::vector<Node*>& nodes, int node_id) {
+    static int get_set_from_node_id(Vec<Node*>& nodes, int node_id) {
         int node_count = nodes.size();
         int set_count = sqrt(node_count);
         return node_id / set_count;
     }
 
 
-    void add_messages(std::vector<int>& new_messages);
+    void add_messages(Vec<int>& new_messages);
 
     void add_message(int message_dest);
 
@@ -134,7 +141,7 @@ public:
 
     void add_neighbour_message_count(MessageCount* mc);
 
-    void init(std::vector<Node*>& nodes_to_init);
+    void init(Vec<Node*>& nodes_to_init);
 
     void step2_round1();
     void step2_round2();

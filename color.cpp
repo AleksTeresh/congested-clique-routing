@@ -1,8 +1,8 @@
-#include <vector>
+#include "node.h"
 
 using namespace std;
 
-bool bpm(vector<vector<int>>& bpGraph, int u, vector<bool>& seen, vector<int>& matchR)
+bool bpm(Vec2<int>& bpGraph, int u, Vec<bool>& seen, Vec<int>& matchR)
 {
     for (int v = 0; v < bpGraph.size(); v++)
     {
@@ -21,8 +21,8 @@ bool bpm(vector<vector<int>>& bpGraph, int u, vector<bool>& seen, vector<int>& m
     return false;
 }
 
-vector<int> reverse(vector<int> matchR) {
-    vector<int> matchL(matchR.size(), -1);
+Vec<int> reverse(Vec<int> matchR) {
+    Vec<int> matchL(matchR.size(), -1);
 
     for (int i = 0; i < matchR.size(); i++) {
         if (matchR[i] != -1) {
@@ -32,13 +32,13 @@ vector<int> reverse(vector<int> matchR) {
     return matchL;
 }
 
-vector<int> max_BPM(vector<vector<int>>& bp_graph)
+Vec<int> max_BPM(Vec2<int>& bp_graph)
 {
-    vector<int> matchR(bp_graph.size(), -1);
+    Vec<int> matchR(bp_graph.size(), -1);
 
     for (int src = 0; src < bp_graph.size(); src++)
     {
-        vector<bool> seen(bp_graph.size(), false);
+        Vec<bool> seen(bp_graph.size(), false);
 
         bpm(bp_graph, src, seen, matchR);
     }

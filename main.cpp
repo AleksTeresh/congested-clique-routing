@@ -3,7 +3,7 @@
 #include "node.cpp"
 #include "clique-router.cpp"
 
-void check_arrived_messages(vector<Node*>& nodes) {
+void check_arrived_messages(Vec<Node*>& nodes) {
     for (auto node : nodes) {
         int global_id = node->get_node_idx();
         auto messages = node->get_messages();
@@ -15,10 +15,10 @@ void check_arrived_messages(vector<Node*>& nodes) {
 }
 
 int test1() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {1, 1, 3, 3};
+    Vec<int> v = {1, 1, 3, 3};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -46,10 +46,10 @@ int test1() {
 }
 
 int test2() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {1, 2, 3, 0};
+    Vec<int> v = {1, 2, 3, 0};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -77,10 +77,10 @@ int test2() {
 }
 
 int test3() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {1, 2, 3, 3};
+    Vec<int> v = {1, 2, 3, 3};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -108,10 +108,10 @@ int test3() {
 }
 
 int test4() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {2, 2, 3, 0};
+    Vec<int> v = {2, 2, 3, 0};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -139,10 +139,10 @@ int test4() {
 }
 
 int test5() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    Vec<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -195,10 +195,10 @@ int test5() {
 }
 
 int test6() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {1, 1, 2, 2, 4, 4, 8, 8, 8};
+    Vec<int> v = {1, 1, 2, 2, 4, 4, 8, 8, 8};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -251,10 +251,10 @@ int test6() {
 }
 
 int test7() {
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
 
     auto n1 = new Node(0);
-    vector<int> v = {1, 1, 2, 6, 4, 4, 8, 8, 8};
+    Vec<int> v = {1, 1, 2, 6, 4, 4, 8, 8, 8};
     n1->add_messages(v);
     nodes.push_back(n1);
 
@@ -308,7 +308,7 @@ int test7() {
 
 void random_test(int subset_size) {
     int set_size = subset_size * subset_size;
-    vector<vector<int>> message_destinations(set_size, vector<int>());
+    Vec2<int> message_destinations(set_size, Vec<int>());
 
     random_device dev;
     mt19937 rng(dev());
@@ -324,7 +324,7 @@ void random_test(int subset_size) {
         }
     }
 
-    vector<Node*> nodes;
+    Vec<Node*> nodes;
     for (int i = 0; i < set_size; i++) {
         auto n = new Node(i);
         n->add_messages(message_destinations[i]);

@@ -1,4 +1,3 @@
-#include <vector>
 #include <unordered_map>
 #include <cmath>
 #include "color.cpp"
@@ -52,7 +51,7 @@ Message* Node::get_message(const function<bool(Message*)> prerequisite) {
     return nullptr;
 }
 
-vector<Message*>::iterator Node::get_message_position(const function<bool(Message*)> prerequisite) {
+Vec<Message*>::iterator Node::get_message_position(const function<bool(Message*)> prerequisite) {
     for (auto it = messages.begin(); it != messages.end();) {
         if (prerequisite(*it)) {
             return it;
@@ -76,13 +75,13 @@ Message* Node::get_message_by_next_set(int next_set_idx) {
     });
 }
 
-void assert_no_edges(vector<vector<int>>& all_messages, int src_idx) {
+void assert_no_edges(Vec2<int>& all_messages, int src_idx) {
     for (int edges_remaining : all_messages[src_idx]) {
         assert(edges_remaining == 0);
     }
 }
 
-void Node::add_missing_edges(vector<vector<int>>& all_messages, int degree) {
+void Node::add_missing_edges(Vec2<int>& all_messages, int degree) {
     for (int i = 0; i < all_messages.size(); i++) {
         int count = 0;
         for (int j = 0; j < all_messages.size(); j++) {
@@ -95,20 +94,20 @@ void Node::add_missing_edges(vector<vector<int>>& all_messages, int degree) {
     }
 }
 
-vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_messages) {
+Vec3<int> Node::get_graph_coloring(Vec2<int> all_messages) {
     return get_graph_coloring(all_messages, set_size * set_size);
 }
 
 // the parameter is modified => the vector is copied instead of reference being used
-vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_messages, int degree) {
+Vec3<int> Node::get_graph_coloring(Vec2<int> all_messages, int degree) {
     add_missing_edges(all_messages, degree);
-    vector<vector<vector<int>>> colors(set_size, vector<vector<int>>(set_size, vector<int>()));
+    Vec3<int> colors(set_size, Vec2<int>(set_size, Vec<int>()));
 
     int color = -1;
     bool empty = false;
     while (!empty) {
         color++;
-        vector<int> matching = max_BPM(all_messages);
+        Vec<int> matching = max_BPM(all_messages);
         empty = true;
 
         for (int i = 0; i < matching.size(); i++) {
@@ -128,7 +127,7 @@ vector<vector<vector<int>>> Node::get_graph_coloring(vector<vector<int>> all_mes
 }
 
 MessageCount* Node::corollary34_create_message_count(
-        vector<int>& message_counts,
+        Vec<int>& message_counts,
         int dest_id, // the MessageCount object will be sent to this node
         int about_node_id // the MessageCount object will have info about number of messages to be sent from global_idx to about_node_id
 ) {
@@ -144,9 +143,9 @@ MessageCount* Node::corollary34_create_message_count(
     return mc;
 }
 
-void Node::corollary34_round1(vector<int>& message_counts, const function<int(int)>& dest_from_inset_node_idx) {
-        vector<vector<int>> edge_counts(set_size, vector<int>(set_size, set_size));
-        vector<vector<vector<int>>> coloring = get_graph_coloring(edge_counts);
+void Node::corollary34_round1(Vec<int>& message_counts, const function<int(int)>& dest_from_inset_node_idx) {
+        Vec2<int> edge_counts(set_size, Vec<int>(set_size, set_size));
+        auto coloring = get_graph_coloring(edge_counts);
 
         int src_idx_in_set = get_node_idx_in_set(global_idx);
 
@@ -211,8 +210,8 @@ void Node::send_message_to_itself(int dest_of_message, int curr_algo_step) {
     }
 }
 
-void Node::corollary_34_round3(vector<vector<int>>& edge_counts, int curr_algo_step) {
-    vector<vector<vector<int>>> coloring = get_graph_coloring(edge_counts);
+void Node::corollary_34_round3(Vec2<int>& edge_counts, int curr_algo_step) {
+    auto coloring = get_graph_coloring(edge_counts);
 
     int src_idx_in_set = get_node_idx_in_set(global_idx);
     int set_id = get_set_idx();
@@ -249,15 +248,15 @@ void Node::corollary_34_round4(int current_algo_step) {
     check_message_count();
 }
 
-vector<Message*>& Node::get_messages() {
+Vec<Message*>& Node::get_messages() {
     return messages;
 }
 
-vector<MessageCount*>& Node::get_message_counts() {
+Vec<MessageCount*>& Node::get_message_counts() {
     return neighbour_message_count;
 }
 
-void Node::add_messages(vector<int>& new_messages) {
+void Node::add_messages(Vec<int>& new_messages) {
     for (int message : new_messages) {
         add_message(message);
     }
@@ -285,18 +284,18 @@ void Node::add_neighbour_message_count(MessageCount* mc) {
     this->neighbour_message_count.push_back(mc);
 }
 
-void Node::init(vector<Node*>& nodes_to_init) {
+void Node::init(Vec<Node*>& nodes_to_init) {
     set_size = sqrt(nodes_to_init.size());
-    nodes = vector<Node*>();
+    nodes = Vec<Node*>();
     for (auto node : nodes_to_init) {
         nodes.push_back(node);
     }
 
-    neighbour_message_count = vector<MessageCount*>();
+    neighbour_message_count = Vec<MessageCount*>();
 }
 
 void Node::step2_round1() {
-    vector<int> message_counts(set_size, 0);
+    Vec<int> message_counts(set_size, 0);
     for (auto message : messages) {
         int dest_set_idx = get_set_from_node_id(nodes, message->dest);
         message_counts[dest_set_idx]++;
@@ -318,7 +317,7 @@ void Node::step2_round1() {
 }
 
 void Node::step2_round2() {
-    vector<int> message_counts(set_size, 0);
+    Vec<int> message_counts(set_size, 0);
     for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
         auto mc = *it;
         if (mc->msg_src == get_set_idx() && mc->info_dest == -1) {
@@ -343,9 +342,9 @@ void Node::step2_round2() {
 }
 
 void Node::step2_round3() {
-    vector<vector<int>> message_count( // from set W to set W'
+    Vec2<int> message_count( // from set W to set W'
             set_size,
-            vector<int>(set_size, 0)
+            Vec<int>(set_size, 0)
     );
 
     for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
@@ -356,12 +355,12 @@ void Node::step2_round3() {
         it = neighbour_message_count.erase(it);
     }
 
-    vector<vector<vector<int>>> coloring = get_graph_coloring(message_count, set_size * set_size * set_size);
+    auto coloring = get_graph_coloring(message_count, set_size * set_size * set_size);
     this->step2_coloring = coloring;
 }
 
 void Node::step2_round4() {
-    vector<int> message_counts(set_size, 0);
+    Vec<int> message_counts(set_size, 0);
 
     for (auto message : messages) {
         message_counts[get_set_from_node_id(nodes, message->dest)]++;
@@ -378,9 +377,9 @@ void Node::step2_round5() {
 }
 
 void Node::step2_round6() {
-    vector<vector<int>> final_message_count( // from node i in W to set W'
+    Vec2<int> final_message_count( // from node i in W to set W'
             set_size,
-            vector<int>(set_size, 0)
+            Vec<int>(set_size, 0)
     );
     for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
         auto mc = *it;
@@ -390,9 +389,9 @@ void Node::step2_round6() {
         it = neighbour_message_count.erase(it);
     }
 
-    vector<vector<int>> message_count( // from node i in W to set W'
+    Vec2<int> message_count( // from node i in W to set W'
             set_size,
-            vector<int>(set_size, 0)
+            Vec<int>(set_size, 0)
     );
     for (int final_dest_set = 0; final_dest_set < set_size; final_dest_set++) {
         for (auto c : step2_coloring[get_set_idx()][final_dest_set]) {
@@ -410,9 +409,9 @@ void Node::step2_round6() {
             }
         }
     }
-    vector<vector<vector<int>>> coloring = get_graph_coloring(message_count); // graph of degree set_size * set_size => n colors used
+    Vec3<int> coloring = get_graph_coloring(message_count); // graph of degree set_size * set_size => n colors used
 
-    vector<vector<int>> edge_counts(set_size, vector<int>(set_size, 0));
+    Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
     for (int local_src_idx = 0; local_src_idx < set_size; local_src_idx++) {
         for (int dest_set_idx = 0; dest_set_idx < set_size; dest_set_idx++) {
             for (auto c : coloring[local_src_idx][dest_set_idx]) {
@@ -431,7 +430,7 @@ void Node::step2_round7() { // send messages within W only as needed
 }
 
 void Node::step2_round8() { // each node in in W sends one message to each node
-    vector<int> next_dest_idx_for_sets(set_size, 0);
+    Vec<int> next_dest_idx_for_sets(set_size, 0);
 
     start_message_count();
     for (auto i = messages.begin(); i != messages.end();) {
@@ -459,7 +458,7 @@ void Node::step2_round8() { // each node in in W sends one message to each node
 }
 
 void Node::step3_round1() {
-    vector<int> message_counts(set_size, 0);
+    Vec<int> message_counts(set_size, 0);
     // at this point all messages are destined within W only
     for (auto message : messages) {
         message_counts[get_set_from_node_id(nodes, message->dest)]++;
@@ -476,7 +475,7 @@ void Node::step3_round2() {
 }
 
 bool Node::node_has_extra_messages_for_set(
-        vector<vector<int>>& message_counts,
+        Vec2<int>& message_counts,
         int local_src_idx,
         int dest_node_idx
 ) {
@@ -518,10 +517,10 @@ void Node::set_next_dest_to_message_by_next_set(
     }
 }
 
-vector<vector<int>> Node::step3_round3_create_graph(
-        vector<vector<int>>& message_counts // message counts from a node in W to a set W'
+Vec2<int> Node::step3_round3_create_graph(
+        Vec2<int>& message_counts // message counts from a node in W to a set W'
 ) {
-    vector<vector<int>> edge_counts(set_size, vector<int>(set_size, 0));
+    Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
     for (int dest_set_idx = 0; dest_set_idx < set_size; dest_set_idx++) { // for each destination set W'
         // for each node in current set W, make sure that it has set_size of messages with destination in W'
         for (int node_local_idx = 0; node_local_idx < set_size; node_local_idx++) {
@@ -550,9 +549,9 @@ vector<vector<int>> Node::step3_round3_create_graph(
 }
 
 void Node::step3_round3() {
-    vector<vector<int>> message_count_per_src_node(
+    Vec2<int> message_count_per_src_node(
         set_size,
-        vector<int>(set_size, 0)
+        Vec<int>(set_size, 0)
     );
 
     for (auto mc : neighbour_message_count) {
@@ -561,7 +560,7 @@ void Node::step3_round3() {
         message_count_per_src_node[src_local_idx][dest_set_idx] = mc->msg_count;
     }
 
-    vector<vector<int>> edge_counts = step3_round3_create_graph(
+    Vec2<int> edge_counts = step3_round3_create_graph(
          message_count_per_src_node
     );
     corollary_34_round3(edge_counts, 3);
@@ -572,7 +571,7 @@ void Node::step3_round4() {
 }
 
 void Node::clear_neighbour_mcs() {
-    neighbour_message_count = vector<MessageCount*>();
+    neighbour_message_count = Vec<MessageCount*>();
 }
 
 void Node::reset_message_next_dest() {
@@ -585,7 +584,7 @@ void Node::reset_message_next_dest() {
 void Node::send_cross_set() {
     int src_set_idx = get_set_idx();
 
-    vector<int> last_idx_per_set;
+    Vec<int> last_idx_per_set;
     last_idx_per_set.resize(sqrt(nodes.size()));
 
     start_message_count();
@@ -609,7 +608,7 @@ void Node::send_cross_set() {
 }
 
 void Node::send_within_set_round1() {
-    vector<int> message_counts(nodes.size(), 0);
+    Vec<int> message_counts(nodes.size(), 0);
     message_counts.resize(nodes.size());
     // at this point all messages are destined within W only
     for (auto message : messages) {
@@ -643,7 +642,7 @@ void Node::prepare_message_for_final_transfer() {
 }
 
 void Node::send_within_set_round3() {
-    vector<vector<int>> edge_counts(set_size, vector<int>(set_size, 0));
+    Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
 
     for (auto mc : neighbour_message_count) {
         int src_local_idx = get_node_idx_in_set(mc->msg_src);

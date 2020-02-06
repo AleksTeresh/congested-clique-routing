@@ -1,5 +1,4 @@
 #include "node.h"
-#include <vector>
 
 using namespace std;
 
@@ -7,14 +6,14 @@ class CliqueRouter {
 private:
     int set_size = 0;
 
-    void init(vector<Node*>& nodes) {
+    void init(Vec<Node*>& nodes) {
         set_size = sqrt(nodes.size());
         for (auto node : nodes) {
             node->init(nodes);
         }
     }
 
-    void move_messages1(vector<Node*>& nodes) {
+    void move_messages1(Vec<Node*>& nodes) {
         check_precondition_for_step_2(nodes);
 
         for (auto node : nodes) {
@@ -48,7 +47,7 @@ private:
         }
     }
 
-    void move_messages2(vector<Node*>& nodes) {
+    void move_messages2(Vec<Node*>& nodes) {
         check_precondition_for_step_3(nodes);
 
         for (auto node : nodes) {
@@ -71,9 +70,9 @@ private:
         }
     }
 
-    void check_step3_round2_result(vector<Node*>& nodes) {
+    void check_step3_round2_result(Vec<Node*>& nodes) {
         for (auto node : nodes) {
-            vector<vector<int>> mcounts(set_size, vector<int>(set_size, 0));
+            Vec2<int> mcounts(set_size, Vec<int>(set_size, 0));
             auto mcs = node->get_message_counts();
             assert(mcs.size() == set_size * set_size);
 
@@ -90,14 +89,14 @@ private:
         }
     }
 
-    void move_messages_between_sets(vector<Node*>& nodes) {
+    void move_messages_between_sets(Vec<Node*>& nodes) {
         check_precondition_for_step_4(nodes);
         for (auto node : nodes) {
             node->send_cross_set();
         }
     }
 
-    void move_messages_within_sets(vector<Node*>& nodes) {
+    void move_messages_within_sets(Vec<Node*>& nodes) {
         check_precondition_for_step_5(nodes);
         for (auto node : nodes) {
             node->clear_neighbour_mcs();
@@ -117,9 +116,9 @@ private:
         }
     }
 
-    void check_precondition_for_step_2(vector<Node*>& nodes) {
-        vector<int> sent(set_size * set_size, 0);
-        vector<int> received(set_size * set_size, 0);
+    void check_precondition_for_step_2(Vec<Node*>& nodes) {
+        Vec<int> sent(set_size * set_size, 0);
+        Vec<int> received(set_size * set_size, 0);
 
         for (auto node : nodes) {
             int src_idx = node->get_node_idx();
@@ -136,8 +135,8 @@ private:
         }
     }
 
-    void check_precondition_for_step_3(vector<Node*>& nodes) {
-        vector<vector<int>> message_counts(set_size, vector<int>(set_size, 0));
+    void check_precondition_for_step_3(Vec<Node*>& nodes) {
+        Vec2<int> message_counts(set_size, Vec<int>(set_size, 0));
 
         for (auto node : nodes) {
             int src_set_idx = node->get_set_idx();
@@ -154,9 +153,9 @@ private:
         }
     }
 
-    void check_precondition_for_step_4(vector<Node*>& nodes) {
+    void check_precondition_for_step_4(Vec<Node*>& nodes) {
         for (auto node : nodes) {
-            vector<int> message_per_set_count(set_size, 0);
+            Vec<int> message_per_set_count(set_size, 0);
             for (auto message : node->get_messages()) {
                 int dest_set_idx = Node::get_set_from_node_id(nodes, message->dest);
                 message_per_set_count[dest_set_idx]++;
@@ -168,7 +167,7 @@ private:
         }
     }
 
-    void check_precondition_for_step_5(vector<Node*>& nodes) {
+    void check_precondition_for_step_5(Vec<Node*>& nodes) {
         for (auto node : nodes) {
             int set_idx = node->get_set_idx();
             for (auto message : node->get_messages()) {
@@ -179,7 +178,7 @@ private:
     }
 
 public:
-    void route(vector<Node*>& nodes) {
+    void route(Vec<Node*>& nodes) {
         init(nodes);
         move_messages1(nodes);
         move_messages2(nodes);
