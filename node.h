@@ -12,25 +12,31 @@ using Vec2 = std::vector<std::vector<T>>;
 template<class T>
 using Vec3 = std::vector<std::vector<std::vector<T>>>;
 
+// struct representing an message
 struct Message {
-    int dest;
-    int src;
+    int final_dest; // index of destination node
+    int src; // index of src node
 
+    // NOTE: the following properties are only used in some algorithm steps
+
+    // the message is to be sent during this step
+    // (e.g. some message of node X are to be moved during step 4 and some are not)
     int step_to_be_sent = 0;
-    int next_dest = -1;
-    int next_set = -1;
+    int next_dest = -1; // node idx to which the message should be sent next (i.e. intermediate destination)
+    int next_set = -1; // set idx to which the message should be sent next (i.e. intermediate destination)
 
     Message(int src, int dest) {
         this->src = src;
-        this->dest = dest;
+        this->final_dest = dest;
     }
 };
 
+// struct used to send info related to message counts between nodes
 struct MessageCount {
-    int msg_src;
-    int msg_dest;
-    int msg_count = 0;
-    int info_dest;
+    int msg_src; // the struct reports number of messages from this src (node or set idx)
+    int msg_dest; // the struct report number of messages with destination to this (node or set idx)
+    int msg_count = 0; // number of messages from msg_src to msg_dest
+    int info_dest; // MessageCount struct is to be delivered to this dest (node idx)
 
     MessageCount(int msg_src, int msg_dest, int msg_count, int info_dest) {
         this->msg_src = msg_src;
@@ -44,12 +50,12 @@ class Node {
 private:
     int global_idx;
     Vec<Message*> messages;
-    Vec<MessageCount*> neighbour_message_count;
-    Vec<Node*> nodes;
+    Vec<MessageCount*> received_message_counts;
+    Vec<Node*> nodes; // list of all nodes in the clique
     Vec3<int> step2_coloring;
 
-    int message_sent_count = 0;
-    int set_size = 0;
+    int message_sent_count = 0; // number of messages sent during a single round
+    int set_size = 0; // size of set W
 
     void start_message_count();
 
@@ -67,7 +73,7 @@ private:
 
     Message* get_message(std::function<bool(Message*)> prerequisite);
 
-    Vec<Message*>::iterator get_message_position(const std::function<bool(Message*)> prerequisite);
+    Vec<Message*>::iterator get_message_position(std::function<bool(Message*)> prerequisite);
 
     void add_missing_edges(Vec2<int>& all_messages, int degree);
 
@@ -118,29 +124,21 @@ public:
         this->global_idx = global_idx;
     }
 
-    Vec<Message*>& get_messages();
-
-    Vec<MessageCount*>& get_message_counts();
-
     static int get_set_from_node_id(Vec<Node*>& nodes, int node_id) {
         int node_count = nodes.size();
         int set_count = sqrt(node_count);
         return node_id / set_count;
     }
 
+    Vec<Message*>& get_messages();
+    Vec<MessageCount*>& get_message_counts();
 
     void add_messages(Vec<int>& new_messages);
-
     void add_message(int message_dest);
-
     void add_message(Message* m);
-
     int get_node_idx();
-
     int get_set_idx();
-
     void add_neighbour_message_count(MessageCount* mc);
-
     void init(Vec<Node*>& nodes_to_init);
 
     void step2_round1();

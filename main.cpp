@@ -9,7 +9,7 @@ void check_arrived_messages(Vec<Node*>& nodes) {
         auto messages = node->get_messages();
 
         for (auto m : messages) {
-            assert(m->dest == global_id);
+            assert(m->final_dest == global_id);
         }
     }
 }

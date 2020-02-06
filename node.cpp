@@ -10,12 +10,12 @@ void Node::start_message_count() {
 }
 
 void Node::check_message_count() {
+    // make sure a nodes does not send more than N-1 messages per round
+    // (a node does not send a message to itself => N-1
     check_message_count(nodes.size() - 1);
 }
 
 void Node::check_message_count(int max_size) {
-    // make sure a nodes does not send more than N-1 messages per round
-    // (a nodes does not send a message to itself => N-1
     assert(message_sent_count <= max_size);
 }
 
@@ -65,7 +65,7 @@ Vec<Message*>::iterator Node::get_message_position(const function<bool(Message*)
 
 Message* Node::get_message_by_dest_set(int dest) {
     return get_message([this, dest](auto m) {
-        return this->get_set_from_node_id(nodes, m->dest) == dest && m->next_dest == -1 && m->next_set == -1;
+        return this->get_set_from_node_id(nodes, m->final_dest) == dest && m->next_dest == -1 && m->next_set == -1;
     });
 }
 
@@ -166,11 +166,11 @@ void Node::corollary34_round1(Vec<int>& message_counts, const function<int(int)>
 
 void Node::corollary_34_round2() {
     start_message_count();
-    for (auto i = neighbour_message_count.begin(); i != neighbour_message_count.end();) {
+    for (auto i = received_message_counts.begin(); i != received_message_counts.end();) {
         auto mc = *i;
         if (mc->info_dest != global_idx) {
             send_neighbour_message_count(mc, mc->info_dest);
-            i = neighbour_message_count.erase(i);
+            i = received_message_counts.erase(i);
         } else {
             i++;
         }
@@ -253,7 +253,7 @@ Vec<Message*>& Node::get_messages() {
 }
 
 Vec<MessageCount*>& Node::get_message_counts() {
-    return neighbour_message_count;
+    return received_message_counts;
 }
 
 void Node::add_messages(Vec<int>& new_messages) {
@@ -281,7 +281,7 @@ int Node::get_set_idx() {
 }
 
 void Node::add_neighbour_message_count(MessageCount* mc) {
-    this->neighbour_message_count.push_back(mc);
+    this->received_message_counts.push_back(mc);
 }
 
 void Node::init(Vec<Node*>& nodes_to_init) {
@@ -291,13 +291,13 @@ void Node::init(Vec<Node*>& nodes_to_init) {
         nodes.push_back(node);
     }
 
-    neighbour_message_count = Vec<MessageCount*>();
+    received_message_counts = Vec<MessageCount*>();
 }
 
 void Node::step2_round1() {
     Vec<int> message_counts(set_size, 0);
     for (auto message : messages) {
-        int dest_set_idx = get_set_from_node_id(nodes, message->dest);
+        int dest_set_idx = get_set_from_node_id(nodes, message->final_dest);
         message_counts[dest_set_idx]++;
     }
 
@@ -318,12 +318,12 @@ void Node::step2_round1() {
 
 void Node::step2_round2() {
     Vec<int> message_counts(set_size, 0);
-    for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
+    for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
         auto mc = *it;
         if (mc->msg_src == get_set_idx() && mc->info_dest == -1) {
             int dest_set_idx = mc->msg_dest;
             message_counts[dest_set_idx] += mc->msg_count;
-            it = neighbour_message_count.erase(it);
+            it = received_message_counts.erase(it);
         } else {
             it++;
         }
@@ -347,12 +347,12 @@ void Node::step2_round3() {
             Vec<int>(set_size, 0)
     );
 
-    for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
+    for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
         auto mc = *it;
         int src_set_idx = mc->msg_src;
         int dest_set_idx = mc->msg_dest;
         message_count[src_set_idx][dest_set_idx] = mc->msg_count;
-        it = neighbour_message_count.erase(it);
+        it = received_message_counts.erase(it);
     }
 
     auto coloring = get_graph_coloring(message_count, set_size * set_size * set_size);
@@ -363,7 +363,7 @@ void Node::step2_round4() {
     Vec<int> message_counts(set_size, 0);
 
     for (auto message : messages) {
-        message_counts[get_set_from_node_id(nodes, message->dest)]++;
+        message_counts[get_set_from_node_id(nodes, message->final_dest)]++;
     }
 
     corollary34_round1(
@@ -381,12 +381,12 @@ void Node::step2_round6() {
             set_size,
             Vec<int>(set_size, 0)
     );
-    for (auto it = neighbour_message_count.begin(); it != neighbour_message_count.end();) {
+    for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
         auto mc = *it;
         int src_idx = get_node_idx_in_set(mc->msg_src);
         int dest_set_idx = mc->msg_dest;
         final_message_count[src_idx][dest_set_idx] = mc->msg_count;
-        it = neighbour_message_count.erase(it);
+        it = received_message_counts.erase(it);
     }
 
     Vec2<int> message_count( // from node i in W to set W'
@@ -461,7 +461,7 @@ void Node::step3_round1() {
     Vec<int> message_counts(set_size, 0);
     // at this point all messages are destined within W only
     for (auto message : messages) {
-        message_counts[get_set_from_node_id(nodes, message->dest)]++;
+        message_counts[get_set_from_node_id(nodes, message->final_dest)]++;
     }
 
     corollary34_round1(
@@ -554,7 +554,7 @@ void Node::step3_round3() {
         Vec<int>(set_size, 0)
     );
 
-    for (auto mc : neighbour_message_count) {
+    for (auto mc : received_message_counts) {
         int src_local_idx = get_node_idx_in_set(mc->msg_src);
         int dest_set_idx = mc->msg_dest;
         message_count_per_src_node[src_local_idx][dest_set_idx] = mc->msg_count;
@@ -571,7 +571,7 @@ void Node::step3_round4() {
 }
 
 void Node::clear_neighbour_mcs() {
-    neighbour_message_count = Vec<MessageCount*>();
+    received_message_counts = Vec<MessageCount*>();
 }
 
 void Node::reset_message_next_dest() {
@@ -590,7 +590,7 @@ void Node::send_cross_set() {
     start_message_count();
     for (auto i = messages.begin(); i != messages.end();) {
         auto message = *i;
-        int dest_set_idx = get_set_from_node_id(nodes, message->dest);
+        int dest_set_idx = get_set_from_node_id(nodes, message->final_dest);
         if (dest_set_idx != src_set_idx) {
             int intermediate_dest = get_nth_node_in_set(
                     dest_set_idx,
@@ -612,7 +612,7 @@ void Node::send_within_set_round1() {
     message_counts.resize(nodes.size());
     // at this point all messages are destined within W only
     for (auto message : messages) {
-        message_counts[message->dest]++;
+        message_counts[message->final_dest]++;
     }
 
     corollary34_round1(
@@ -635,7 +635,7 @@ void Node::send_within_set_round2() {
 void Node::prepare_message_for_final_transfer() {
     for (auto i = messages.begin(); i != messages.end();) {
         auto message = *i;
-        message->next_dest = message->dest;
+        message->next_dest = message->final_dest;
         message->step_to_be_sent = -1;
         i++;
     }
@@ -644,7 +644,7 @@ void Node::prepare_message_for_final_transfer() {
 void Node::send_within_set_round3() {
     Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
 
-    for (auto mc : neighbour_message_count) {
+    for (auto mc : received_message_counts) {
         int src_local_idx = get_node_idx_in_set(mc->msg_src);
         int dest_local_idx = get_node_idx_in_set(mc->msg_dest);
         edge_counts[src_local_idx][dest_local_idx] = mc->msg_count;
