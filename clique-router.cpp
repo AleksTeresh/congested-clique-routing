@@ -13,6 +13,8 @@ private:
         }
     }
 
+    // Algorithm 2
+    // move all messages s.t. each subset W holds exactly set_size * set_size messages for each W'
     void step2(Vec<shared_ptr<Node>>& nodes) {
         check_step_2_precondition(nodes);
 
@@ -47,6 +49,9 @@ private:
         }
     }
 
+    // for each pair of subsets W, W' move messages destined
+    // to W' within W s.t. each node holds exactly set_size messages
+    // with destination in W'
     void step3(Vec<shared_ptr<Node>>& nodes) {
         check_step_3_precondition(nodes);
 
@@ -89,6 +94,7 @@ private:
         }
     }
 
+    // for each pair W and W'. Move all messages destined to nodes in W' from W to W'
     void move_messages_between_sets(Vec<shared_ptr<Node>>& nodes) {
         check_step_4_precondition(nodes);
         for (auto& node : nodes) {
@@ -96,6 +102,7 @@ private:
         }
     }
 
+    // for each subset W move messages within it to their final destinations
     void move_messages_within_sets(Vec<shared_ptr<Node>>& nodes) {
         check_step_5_precondition(nodes);
         for (auto& node : nodes) {

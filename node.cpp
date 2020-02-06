@@ -155,7 +155,6 @@ void Node::corollary34_round1(Vec<int>& message_counts, const function<int(int)>
 
         int src_idx_in_set = get_local_id_from_global(global_idx);
 
-
         start_message_count();
         // step 1 of Corollary 3.4
         loop(set_size, [&](int dest_local_idx) { // destination node of the message
@@ -297,13 +296,17 @@ void Node::init(Vec<shared_ptr<Node>>& nodes_to_init) {
     received_message_counts = Vec<unique_ptr<MessageCount>>();
 }
 
+// send the number of messages destined to i'th subset that the
+// current node holds to i'th node of the current subset W
 void Node::step2_round1() {
     Vec<int> message_counts(set_size, 0);
+    // count messages destined to each subset W'
     for (auto& message : messages) {
         int dest_set_idx = get_set_from_node_id(nodes, message->final_dest);
         message_counts[dest_set_idx]++;
     }
 
+    // send count figures for i'th subset to i'th node in the current subset W (with local index i)
     loop(set_size, [&](int i) {
         int local_dest_idx = i;
         int global_dest_idx = get_global_id_from_local(get_set_idx(), local_dest_idx);
@@ -319,8 +322,11 @@ void Node::step2_round1() {
     });
 }
 
+// the node announces message counts (from this subset W to i'th subset W'
+// (where i is local index of the node)) to all the nodes in the clique
 void Node::step2_round2() {
     Vec<int> message_counts(set_size, 0);
+    // sum up the number of messages W holds for i'th subset W' (where i is local idx of the curent node)
     for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
         auto& mc = *it;
         if (mc->msg_src == get_set_idx() && mc->info_dest == -1) {
@@ -332,6 +338,7 @@ void Node::step2_round2() {
         }
     }
 
+    // announce the number of messages W holds for i'th subset W' to all nodes
     for (auto& node : nodes) {
         int i = get_local_id_from_global(global_idx); // stands for destination set idx
         auto locked_node = node.lock();
@@ -345,24 +352,33 @@ void Node::step2_round2() {
     }
 }
 
+// construct bipartite graph G as follows.
+// set_size senders, set_size receivers. For each message W needs to send to W', add an edge from S to R
 void Node::step2_round3() {
     Vec2<int> message_count( // from set W to set W'
             set_size,
             Vec<int>(set_size, 0)
     );
 
+    // count total number of messages from each subset to each subset
     for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
         auto& mc = *it;
         int src_set_idx = mc->msg_src;
         int dest_set_idx = mc->msg_dest;
         message_count[src_set_idx][dest_set_idx] = mc->msg_count;
+        // delete message_counts objects
         it = received_message_counts.erase(it);
     }
 
+    // graph's degree is set_size ^ 3, since each node needs to send and receive set_size^2 messages,
+    // and there are set_size nodes in each subset. => can be edge-colored with set_size ^ 3 colors
     auto coloring = get_graph_coloring(message_count, set_size * set_size * set_size);
-    this->step2_coloring = coloring;
+    this->step2_coloring = coloring; // save the coloring of the graph for future rounds
 }
 
+// announce to all other nodes in current subset the number of message this node has destined for each subset W'
+// i.e. just compute sum of message counts for each subset W' and set_size pieces of info to each of the nodes in the subset W
+// corollary 3.4 is used => the operation is done in 2 rounds
 void Node::step2_round4() {
     Vec<int> message_counts(set_size, 0);
 
@@ -376,15 +392,20 @@ void Node::step2_round4() {
     );
 }
 
+// 2nd round of corollary 3.4, see comments for step2_round4.
 void Node::step2_round5() {
     corollary_34_round2();
 }
 
+//
 void Node::step2_round6() {
     Vec2<int> final_message_count( // from node i in W to set W'
             set_size,
             Vec<int>(set_size, 0)
     );
+    // count messages from each node i in W to each of the sets W',
+    // and delete message_counts objects that has been used to collect the data
+    // This info is available due to rounds 4 and 5.
     for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
         auto& mc = *it;
         int src_idx = get_local_id_from_global(mc->msg_src);
@@ -398,13 +419,21 @@ void Node::step2_round6() {
             Vec<int>(set_size, 0)
     );
 
-    loop(set_size, [&](int final_dest_set) {
-        for (auto c : step2_coloring[get_set_idx()][final_dest_set]) {
-            int intermediate_dest_set = c % set_size;
+    // This for loop construct another bipartite graph G. s.t. nodes in the current subset are on one side
+    // and each of the sets W' are on the other.
+    // The idae is to use previously computed coloring and construct a new graph s.t. a message of color c is sent
+    // (as an intermediate destination) to set (c % set_size).
+    loop(set_size, [&](int final_dest_set) { // for each destination subset W'
+        for (auto c : step2_coloring[get_set_idx()][final_dest_set]) { // get next colored edge from W to W'
+            int intermediate_dest_set = c % set_size; // idx of the set the message should first be sent to
 
-            int local_src_idx = 0;
+            // Now we know that a message with color c should be sent from W
+            // to intermediate_dest_set (as intermediate destination).
+            // In the for loop, we're looking for a node that has a message that suits the characteristics
+            // (i.e. final destinations should match)
+            int local_src_idx = 0; // candidate local node
             while (true) {
-                if (final_message_count[local_src_idx][final_dest_set] > 0) { // we found a source for this particular color
+                if (final_message_count[local_src_idx][final_dest_set] > 0) { // we found a source node for this particular color
                     set_next_set_to_message(final_dest_set, local_src_idx, intermediate_dest_set);
                     message_count[local_src_idx][intermediate_dest_set]++;
                     final_message_count[local_src_idx][final_dest_set]--;
@@ -414,10 +443,13 @@ void Node::step2_round6() {
             }
         }
     });
+    // the we color the newly constructed bipartite graph (from each node of W to intermediate destination set R)
     Vec3<int> coloring = get_graph_coloring(message_count); // graph of degree set_size * set_size => n colors used
 
     Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
 
+    // now based on the second bipartite graph coloring, construct a graph (i.e. plan for sending)
+    // s.t. message of color i is sent to (c % set_size) node in current W (i.e. node that has local idx c % set_size)
     loop(set_size, [&](int local_src_idx) {
         loop(set_size, [&](int dest_set_idx) {
             for (auto c : coloring[local_src_idx][dest_set_idx]) {
@@ -428,30 +460,36 @@ void Node::step2_round6() {
         });
     });
 
+    // the computed plan will be next executed in 2 rounds (using Corollary 3.4). i.e. the messages are moved only
+    // within W for now.
+    // In round8, the messages will finally be moved to other W' subset (as their intertmediate destinations)
     corollary_34_round3(edge_counts, 2);
 }
 
+// 2nd round of Corollary 3.4. See comments for round 6.
 void Node::step2_round7() { // send messages within W only as needed
     corollary_34_round4(2);
 }
 
+// By now we've achieved that each node holds exactly set_size messages with destination of W' (for each W')
+// Thus, current, node can send one message to each of the set_size nodes of W' (for each W')
 void Node::step2_round8() { // each node in in W sends one message to each node
     Vec<int> next_dest_idx_for_sets(set_size, 0);
 
     start_message_count();
-    for (auto i = messages.begin(); i != messages.end();) {
+    for (auto i = messages.begin(); i != messages.end();) { // for each message held
         auto& message = *i;
-        if (message->next_set == -1) { // already sent
+        if (message->next_set == -1) { // message is in the right intermediate destination set already
             i++;
             continue;
         }
 
         int next_set = message->next_set;
-        int inset_dest_idx = next_dest_idx_for_sets[next_set];
-        int global_dest_idx = get_global_id_from_local(next_set, inset_dest_idx);
+        int local_dest_idx = next_dest_idx_for_sets[next_set];
+        int global_dest_idx = get_global_id_from_local(next_set, local_dest_idx);
 
-        message->next_set = -1;
-        if (global_dest_idx != global_idx) {
+        message->next_set = -1; // mark the message s.t. it is already in its intermediate destination set
+        if (global_dest_idx != global_idx) { // if dest is not the current node
             send_message(move(*i), global_dest_idx, 0);
             i = messages.erase(i);
         } else {
