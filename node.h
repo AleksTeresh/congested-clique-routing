@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <memory>
 #include <cmath>
 
 template<class T>
@@ -49,9 +50,9 @@ struct MessageCount {
 class Node {
 private:
     int global_idx;
-    Vec<Message*> messages;
-    Vec<MessageCount*> received_message_counts;
-    Vec<Node*> nodes; // list of all nodes in the clique
+    Vec<std::unique_ptr<Message>> messages;
+    Vec<std::unique_ptr<MessageCount>> received_message_counts;
+    Vec<std::shared_ptr<Node>> nodes; // list of all nodes in the clique
     Vec3<int> step2_coloring;
 
     int message_sent_count = 0; // number of messages sent during a single round
@@ -67,23 +68,23 @@ private:
 
     int get_global_id_from_local(int set_idx, int node_idx);
 
-    void send_message(Message* message, int intermediate_dest, int step_to_be_sent);
+    void send_message(std::unique_ptr<Message> message, int intermediate_dest, int step_to_be_sent);
 
-    void send_message_counts(MessageCount* mc, int intermediate_dest);
+    void send_message_counts(std::unique_ptr<MessageCount> mc, int intermediate_dest);
 
-    Message* get_message(std::function<bool(Message*)> prerequisite);
+    Message& get_message(std::function<bool(Message&)> prerequisite);
 
-    Vec<Message*>::iterator get_message_pos(const std::function<bool(Message *)> prerequisite);
+    Vec<std::unique_ptr<Message>>::iterator get_message_pos(std::function<bool(Message&)> prerequisite);
 
     void add_missing_edges(Vec2<int>& all_messages, int degree);
 
-    Message* get_message_by_dest_set(int dest);
-    Message* get_message_by_next_set(int next_set_idx);
+    Message& get_message_by_dest_set(int dest);
+    Message& get_message_by_next_set(int next_set_idx);
 
-    Vec3<int> get_graph_coloring(Vec2<int> all_messages);
+    Vec3<int> get_graph_coloring(Vec2<int>& all_messages);
     Vec3<int> get_graph_coloring(Vec2<int> all_messages, int degree);
 
-    MessageCount* corollary34_create_message_count(
+    std::unique_ptr<MessageCount> corollary34_create_message_count(
             Vec<int>& message_counts,
             int dest_id, // the MessageCount object will be sent to this node
             int about_node_id // the MessageCount object will have info about number of messages to be sent from global_idx to about_node_id
@@ -124,22 +125,22 @@ public:
         this->global_idx = global_idx;
     }
 
-    static int get_set_from_node_id(Vec<Node*>& nodes, int node_id) {
+    static int get_set_from_node_id(Vec<std::shared_ptr<Node>>& nodes, int node_id) {
         int node_count = nodes.size();
         int set_count = sqrt(node_count);
         return node_id / set_count;
     }
 
-    Vec<Message*>& get_messages();
-    Vec<MessageCount*>& get_message_counts();
+    Vec<std::unique_ptr<Message>>& get_messages();
+    Vec<std::unique_ptr<MessageCount>>& get_message_counts();
 
     void add_messages(Vec<int>& new_messages);
     void add_message(int message_dest);
-    void add_message(Message* m);
+    void add_message(std::unique_ptr<Message> m);
     int get_node_idx();
     int get_set_idx();
-    void add_neighbour_message_count(MessageCount* mc);
-    void init(Vec<Node*>& nodes_to_init);
+    void add_received_message_count(std::unique_ptr<MessageCount> mc);
+    void init(Vec<std::shared_ptr<Node>>& nodes_to_init);
 
     void step2_round1();
     void step2_round2();
@@ -155,7 +156,7 @@ public:
     void step3_round3();
     void step3_round4();
 
-    void clear_neighbour_mcs();
+    void clear_received_mcs();
     void reset_message_next_dest();
     void prepare_message_for_final_transfer();
 

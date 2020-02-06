@@ -6,77 +6,77 @@ class CliqueRouter {
 private:
     int set_size = 0;
 
-    void init(Vec<Node*>& nodes) {
+    void init(Vec<shared_ptr<Node>>& nodes) {
         set_size = sqrt(nodes.size());
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->init(nodes);
         }
     }
 
-    void step2(Vec<Node*>& nodes) {
+    void step2(Vec<shared_ptr<Node>>& nodes) {
         check_step_2_precondition(nodes);
 
-        for (auto node : nodes) {
-            node->clear_neighbour_mcs();
+        for (auto& node : nodes) {
+            node->clear_received_mcs();
             node->reset_message_next_dest();
         }
 
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round1();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round2();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round3();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round4();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round5();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round6();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round7();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step2_round8();
         }
     }
 
-    void step3(Vec<Node*>& nodes) {
+    void step3(Vec<shared_ptr<Node>>& nodes) {
         check_step_3_precondition(nodes);
 
-        for (auto node : nodes) {
-            node->clear_neighbour_mcs();
+        for (auto& node : nodes) {
+            node->clear_received_mcs();
             node->reset_message_next_dest();
         }
 
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step3_round1();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step3_round2();
         }
         check_step3_round2_result(nodes);
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step3_round3();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->step3_round4();
         }
     }
 
-    void check_step3_round2_result(Vec<Node*>& nodes) {
-        for (auto node : nodes) {
+    void check_step3_round2_result(Vec<shared_ptr<Node>>& nodes) {
+        for (auto& node : nodes) {
             Vec2<int> mcounts(set_size, Vec<int>(set_size, 0));
-            auto mcs = node->get_message_counts();
+            auto& mcs = node->get_message_counts();
             assert(mcs.size() == set_size * set_size);
 
-            for (auto mc : mcs) {
+            for (auto& mc : mcs) {
                 assert(mc->info_dest == node->get_node_idx()); // the message count is at the destination
                 mcounts[mc->msg_src - node->get_set_idx() * set_size][mc->msg_dest]++;
             }
@@ -89,40 +89,40 @@ private:
         }
     }
 
-    void move_messages_between_sets(Vec<Node*>& nodes) {
+    void move_messages_between_sets(Vec<shared_ptr<Node>>& nodes) {
         check_step_4_precondition(nodes);
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->send_cross_set();
         }
     }
 
-    void move_messages_within_sets(Vec<Node*>& nodes) {
+    void move_messages_within_sets(Vec<shared_ptr<Node>>& nodes) {
         check_step_5_precondition(nodes);
-        for (auto node : nodes) {
-            node->clear_neighbour_mcs();
+        for (auto& node : nodes) {
+            node->clear_received_mcs();
             node->prepare_message_for_final_transfer();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->send_within_set_round1();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->send_within_set_round2();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->send_within_set_round3();
         }
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             node->send_within_set_round4();
         }
     }
 
-    void check_step_2_precondition(Vec<Node*>& nodes) {
+    void check_step_2_precondition(Vec<shared_ptr<Node>>& nodes) {
         Vec<int> sent(set_size * set_size, 0);
         Vec<int> received(set_size * set_size, 0);
 
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             int src_idx = node->get_node_idx();
-            for (auto message : node->get_messages()) {
+            for (auto& message : node->get_messages()) {
                 int dest_idx = message->final_dest;
                 sent[src_idx]++;
                 received[dest_idx]++;
@@ -135,12 +135,12 @@ private:
         }
     }
 
-    void check_step_3_precondition(Vec<Node*>& nodes) {
+    void check_step_3_precondition(Vec<shared_ptr<Node>>& nodes) {
         Vec2<int> message_counts(set_size, Vec<int>(set_size, 0));
 
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             int src_set_idx = node->get_set_idx();
-            for (auto message : node->get_messages()) {
+            for (auto& message : node->get_messages()) {
                 int dest_set_idx = Node::get_set_from_node_id(nodes, message->final_dest);
                 message_counts[src_set_idx][dest_set_idx]++;
             }
@@ -153,10 +153,10 @@ private:
         }
     }
 
-    void check_step_4_precondition(Vec<Node*>& nodes) {
-        for (auto node : nodes) {
+    void check_step_4_precondition(Vec<shared_ptr<Node>>& nodes) {
+        for (auto& node : nodes) {
             Vec<int> message_per_set_count(set_size, 0);
-            for (auto message : node->get_messages()) {
+            for (auto& message : node->get_messages()) {
                 int dest_set_idx = Node::get_set_from_node_id(nodes, message->final_dest);
                 message_per_set_count[dest_set_idx]++;
             }
@@ -167,10 +167,10 @@ private:
         }
     }
 
-    void check_step_5_precondition(Vec<Node*>& nodes) {
-        for (auto node : nodes) {
+    void check_step_5_precondition(Vec<shared_ptr<Node>>& nodes) {
+        for (auto& node : nodes) {
             int set_idx = node->get_set_idx();
-            for (auto message : node->get_messages()) {
+            for (auto& message : node->get_messages()) {
                 int dest_set_idx = Node::get_set_from_node_id(nodes, message->final_dest);
                 assert(dest_set_idx == set_idx);
             }
@@ -178,7 +178,7 @@ private:
     }
 
 public:
-    void route(Vec<Node*>& nodes) {
+    void route(Vec<shared_ptr<Node>>& nodes) {
         init(nodes);
         step2(nodes);
         step3(nodes);
