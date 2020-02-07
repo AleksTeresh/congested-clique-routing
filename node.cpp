@@ -296,17 +296,18 @@ void Node::init(Vec<shared_ptr<Node>>& nodes_to_init) {
     received_message_counts = Vec<unique_ptr<MessageCount>>();
 }
 
-// send the number of messages destined to i'th subset that the
-// current node holds to i'th node of the current subset W
-void Node::step2_round1() {
+Vec<int> Node::count_messages_for_each_subset() {
     Vec<int> message_counts(set_size, 0);
     // count messages destined to each subset W'
     for (auto& message : messages) {
         int dest_set_idx = get_set_from_node_id(nodes, message->final_dest);
         message_counts[dest_set_idx]++;
     }
+    return message_counts;
+}
 
-    // send count figures for i'th subset to i'th node in the current subset W (with local index i)
+// send count figures for i'th subset to i'th node in the current subset W (with local index i)
+void Node::send_counts_for_ith_subset_locally(Vec<int> message_counts) {
     loop(set_size, [&](int i) {
         int local_dest_idx = i;
         int global_dest_idx = get_global_id_from_local(get_set_idx(), local_dest_idx);
@@ -322,9 +323,14 @@ void Node::step2_round1() {
     });
 }
 
-// the node announces message counts (from this subset W to i'th subset W'
-// (where i is local index of the node)) to all the nodes in the clique
-void Node::step2_round2() {
+// send the number of messages destined to i'th subset that the
+// current node holds to i'th node of the current subset W
+void Node::step2_round1() {
+    auto message_counts = count_messages_for_each_subset();
+    send_counts_for_ith_subset_locally(message_counts);
+}
+
+Vec<int> Node::sum_up_message_counts() {
     Vec<int> message_counts(set_size, 0);
     // sum up the number of messages W holds for i'th subset W' (where i is local idx of the curent node)
     for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
@@ -337,7 +343,10 @@ void Node::step2_round2() {
             it++;
         }
     }
+    return message_counts;
+}
 
+void Node::broadcast_message_counts(Vec<int> message_counts) {
     // announce the number of messages W holds for i'th subset W' to all nodes
     for (auto& node : nodes) {
         int i = get_local_id_from_global(global_idx); // stands for destination set idx
@@ -350,6 +359,13 @@ void Node::step2_round2() {
         );
         send_message_counts(move(mc), locked_node->get_node_idx());
     }
+}
+
+// the node announces message counts (from this subset W to i'th subset W'
+// (where i is local index of the node)) to all the nodes in the clique
+void Node::step2_round2() {
+    auto message_counts = sum_up_message_counts();
+    broadcast_message_counts(message_counts);
 }
 
 // construct bipartite graph G as follows.
@@ -397,8 +413,8 @@ void Node::step2_round5() {
     corollary_34_round2();
 }
 
-//
-void Node::step2_round6() {
+
+Vec2<int> Node::count_messages_inter_set() {
     Vec2<int> final_message_count( // from node i in W to set W'
             set_size,
             Vec<int>(set_size, 0)
@@ -414,6 +430,10 @@ void Node::step2_round6() {
         it = received_message_counts.erase(it);
     }
 
+    return final_message_count;
+}
+
+Vec2<int> Node::build_inter_set_graph(Vec2<int> final_message_count) {
     Vec2<int> message_count( // from node i in W to set W'
             set_size,
             Vec<int>(set_size, 0)
@@ -443,13 +463,15 @@ void Node::step2_round6() {
             }
         }
     });
-    // the we color the newly constructed bipartite graph (from each node of W to intermediate destination set R)
-    Vec3<int> coloring = get_graph_coloring(message_count); // graph of degree set_size * set_size => n colors used
 
+    return message_count;
+}
+
+// now based on the second bipartite graph coloring, construct a graph (i.e. plan for sending)
+// s.t. message of color i is sent to (c % set_size) node in current W (i.e. node that has local idx c % set_size)
+Vec2<int> Node::build_inset_graph(Vec3<int> coloring) {
     Vec2<int> edge_counts(set_size, Vec<int>(set_size, 0));
 
-    // now based on the second bipartite graph coloring, construct a graph (i.e. plan for sending)
-    // s.t. message of color i is sent to (c % set_size) node in current W (i.e. node that has local idx c % set_size)
     loop(set_size, [&](int local_src_idx) {
         loop(set_size, [&](int dest_set_idx) {
             for (auto c : coloring[local_src_idx][dest_set_idx]) {
@@ -460,6 +482,15 @@ void Node::step2_round6() {
         });
     });
 
+    return edge_counts;
+}
+
+void Node::step2_round6() {
+    auto inter_set_message_count = count_messages_inter_set();
+    auto message_count = build_inter_set_graph(inter_set_message_count);
+    // the we color the newly constructed bipartite graph (from each node of W to intermediate destination set R)
+    auto coloring = get_graph_coloring(message_count); // graph of degree set_size * set_size => n colors used
+    auto edge_counts = build_inset_graph(coloring);
     // the computed plan will be next executed in 2 rounds (using Corollary 3.4). i.e. the messages are moved only
     // within W for now.
     // In round8, the messages will finally be moved to other W' subset (as their intertmediate destinations)

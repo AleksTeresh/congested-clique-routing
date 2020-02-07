@@ -133,6 +133,16 @@ private:
 
     void send_message_to_itself(int dest_of_message, int curr_algo_step);
 
+    Vec<int> count_messages_for_each_subset();
+    void send_counts_for_ith_subset_locally(Vec<int> message_counts);
+
+    Vec2<int> count_messages_inter_set();
+    Vec2<int> build_inter_set_graph(Vec2<int> final_message_count);
+    Vec2<int> build_inset_graph(Vec3<int> coloring);
+
+    Vec<int> sum_up_message_counts();
+    void broadcast_message_counts(Vec<int> message_counts);
+
 public:
     explicit Node(int global_idx) {
         this->global_idx = global_idx;
