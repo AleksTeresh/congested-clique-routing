@@ -393,7 +393,7 @@ void Node::step2_round3() {
 }
 
 // announce to all other nodes in current subset the number of message this node has destined for each subset W'
-// i.e. just compute sum of message counts for each subset W' and set_size pieces of info to each of the nodes in the subset W
+// i.e. just compute sum of message counts for each subset W' and send set_size pieces of info to each of the nodes in the subset W
 // corollary 3.4 is used => the operation is done in 2 rounds
 void Node::step2_round4() {
     Vec<int> message_counts(set_size, 0);
@@ -441,7 +441,7 @@ Vec2<int> Node::build_inter_set_graph(Vec2<int> final_message_count) {
 
     // This for loop construct another bipartite graph G. s.t. nodes in the current subset are on one side
     // and each of the sets W' are on the other.
-    // The idae is to use previously computed coloring and construct a new graph s.t. a message of color c is sent
+    // The idea is to use previously computed coloring and construct a new graph s.t. a message of color c is sent
     // (as an intermediate destination) to set (c % set_size).
     loop(set_size, [&](int final_dest_set) { // for each destination subset W'
         for (auto c : step2_coloring[get_set_idx()][final_dest_set]) { // get next colored edge from W to W'
@@ -532,19 +532,23 @@ void Node::step2_round8() { // each node in in W sends one message to each node
     check_message_count();
 }
 
+// the node announces to each other node in W, how many messages
+// it holds for each subset W'
 void Node::step3_round1() {
     Vec<int> message_counts(set_size, 0);
-    // at this point all messages are destined within W only
+    // count how many messages this node has for each of the subsets
     for (auto& message : messages) {
         message_counts[get_set_from_node_id(nodes, message->final_dest)]++;
     }
 
+    // announce to other nodes in W how many messages this node has for other subsets
     corollary34_round1(
             message_counts,
             [](int inset_node_idx) { return inset_node_idx; }
     );
 }
 
+// second rounds. This completes previous round
 void Node::step3_round2() {
     corollary_34_round2();
 }
@@ -632,6 +636,10 @@ void Node::find_missing_messages(
     }
 }
 
+// build a bipartite graph where vertices are nodes of the current subset in their
+// sending and receiving roles. The idea is to find nodes that have too many
+// messages for some subset W' and nodes that have too few, and add edges from the former
+// to the latter ones.
 Vec2<int> Node::step3_round3_create_graph(
         Vec2<int>& message_counts // message counts from a node in W to a set W'
 ) {
@@ -650,18 +658,26 @@ Vec2<int> Node::step3_round3_create_graph(
     return edge_counts;
 }
 
+// calculate how many messages each node in the subset W has for each subset W'. If the number if <= set_size
+// find messages with the destination in the same subset W' among other nodes of the current subset W.
+// Finally send messages within nodes of the current subset s.t. in the end each node has exactly set_size
+// messages with destination in each subset W'
 void Node::step3_round3() {
     Vec2<int> message_count_per_src_node(
         set_size,
         Vec<int>(set_size, 0)
     );
 
+    // calculate message count for each node in the subset W to each of the subsets W'
     for (auto& mc : received_message_counts) {
         int src_local_idx = get_local_id_from_global(mc->msg_src);
         int dest_set_idx = mc->msg_dest;
         message_count_per_src_node[src_local_idx][dest_set_idx] = mc->msg_count;
     }
 
+    // build the graph according to which the "missing" message
+    // will be sent from nodes that have too many messages destined to some W'
+    // to nodes that have too few
     Vec2<int> edge_counts = step3_round3_create_graph(
          message_count_per_src_node
     );
@@ -722,6 +738,7 @@ void Node::prepare_message_for_final_transfer() {
 }
 
 // step 5 round 1
+//
 void Node::send_within_set_round1() {
     Vec<int> message_counts(nodes.size(), 0);
     message_counts.resize(nodes.size());
