@@ -17,6 +17,8 @@ This section describes the algorithm. While [the original paper](https://people.
 
 The description follows notation similar to that of the [the original paper](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf). A subset of nods in its sending role is denoted as $W$ and a subset in its receiving role by $W'$.
 
+Finally, the algorithm description below is, obviously, heavily based on [the paper](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf). In particular, certain sentences or paragraphs from the paper were directly used in the description.
+
 ### Assumptions
 
 Note that in the description below, we assume that the number of nodes in a single subset is exactly $\sqrt n$ (which is an integer) for each subset, and there are $\sqrt n$ subsets in total. Besides, each of the nodes sends and receives exactly $n$ messages. These constraints are introduced for clarity and can be relaxed with trivial modifications to the algorithm.
