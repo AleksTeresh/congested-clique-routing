@@ -10,3 +10,7 @@ c++ --std=c++17 ./main.cpp
 ```
 
 Executing the compiled output will run several tests on both hardcoded and randomly generated inputs (see main.cpp).
+
+## Algorithm
+
+An alternative description of the algorithm, which might be more useful for the purpose of implementation can be found [here](https://alekte.com/congested-clique-routing/)
