@@ -1,17 +1,48 @@
 #include "node.h"
-#include "./lib/json.hpp"
+#include "./lib/json.h"
 
 using namespace std;
+
+struct NodeData {
+    int id;
+    vector<Message> messages;
+    vector<MessageCount> message_counts;
+
+    NodeData(int id, vector<unique_ptr<Message>>& messages, vector<unique_ptr<MessageCount>>& message_counts) {
+        this->id = id;
+        for (auto& m : messages) {
+            this->messages.push_back(*m);
+        }
+        for (auto& mc : message_counts) {
+            this->message_counts.push_back(*mc);
+        }
+    }
+};
+
+struct TimePoint {
+    vector<NodeData> nodes;
+};
 
 class CliqueRouter {
 private:
     int set_size = 0;
+    vector<TimePoint> history;
 
     void init(Vec<shared_ptr<Node>>& nodes) {
         set_size = sqrt(nodes.size());
         for (auto& node : nodes) {
             node->init(nodes);
         }
+    }
+
+    void update_history(Vec<shared_ptr<Node>>& nodes) {
+        TimePoint tp;
+        for (auto& node : nodes) {
+            auto raw = node.get();
+            NodeData nd(raw->get_node_idx(), raw->get_messages(), raw->get_message_counts());
+            tp.nodes.push_back(nd);
+        }
+        history.push_back(tp);
     }
 
     // Algorithm 2
@@ -27,27 +58,35 @@ private:
         for (auto& node : nodes) {
             node->step2_round1();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round2();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round3();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round4();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round5();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round6();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round7();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step2_round8();
         }
+        update_history(nodes);
     }
 
     // for each pair of subsets W, W' move messages destined
@@ -64,16 +103,20 @@ private:
         for (auto& node : nodes) {
             node->step3_round1();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step3_round2();
         }
+        update_history(nodes);
         check_step3_round2_result(nodes);
         for (auto& node : nodes) {
             node->step3_round3();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->step3_round4();
         }
+        update_history(nodes);
     }
 
     void check_step3_round2_result(Vec<shared_ptr<Node>>& nodes) {
@@ -101,6 +144,7 @@ private:
         for (auto& node : nodes) {
             node->send_cross_set();
         }
+        update_history(nodes);
     }
 
     // for each subset W move messages within it to their final destinations
@@ -113,15 +157,19 @@ private:
         for (auto& node : nodes) {
             node->send_within_set_round1();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->send_within_set_round2();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->send_within_set_round3();
         }
+        update_history(nodes);
         for (auto& node : nodes) {
             node->send_within_set_round4();
         }
+        update_history(nodes);
     }
 
     void check_step_2_precondition(Vec<shared_ptr<Node>>& nodes) {
@@ -188,6 +236,7 @@ private:
 public:
     void route(Vec<shared_ptr<Node>>& nodes) {
         init(nodes);
+        update_history(nodes);
         step2(nodes);
         step3(nodes);
         move_messages_between_sets(nodes);
