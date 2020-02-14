@@ -1,4 +1,10 @@
 
+---
+title: "Clique routing algorithm"
+output: html_document
+---
+
+
 # Overview
 
 This report describes the congested clique routing algorithm. While [the original paper](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf) provides a detailed description of the algorithm, it is perhaps targeted more towards understanding the ideas on the conceptual level (i.e. what is happening) as opposed to implementation detail (how to make it happen). In particular, it seems that Step 2 of Algorithm 1 could be described more explicitly if the goal of the description would be the implementation of the algorithm. What follows is a humble attempt at describing the routing algorithm in plain English s.t. it is easy to translate it to code.
