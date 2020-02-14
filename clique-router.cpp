@@ -2,6 +2,7 @@
 #include "./lib/json.h"
 
 using namespace std;
+using nlohmann::json;
 
 struct NodeData {
     int id;
@@ -23,6 +24,34 @@ struct TimePoint {
     vector<NodeData> nodes;
 };
 
+void to_json(json& j, const MessageCount& message_count) {
+    j = json{
+        {"msgSrc", message_count.msg_src},
+        {"msgDest", message_count.msg_dest},
+        {"msgCount", message_count.msg_count},
+        {"infoDest", message_count.info_dest}
+    };
+}
+
+void to_json(json& j, const Message& message) {
+    j = json{
+        {"src", message.src},
+        {"finalDest", message.final_dest}
+    };
+}
+
+void to_json(json& j, const NodeData& node) {
+    j = json{
+        {"id", node.id},
+        {"messages", node.messages},
+        {"messageCounts", node.message_counts}
+    };
+}
+
+void to_json(json& j, const TimePoint& tp) {
+    j = json{{"nodes", tp.nodes}};
+}
+
 class CliqueRouter {
 private:
     int set_size = 0;
@@ -33,6 +62,11 @@ private:
         for (auto& node : nodes) {
             node->init(nodes);
         }
+    }
+
+    void init_history(Vec<shared_ptr<Node>>& nodes) {
+        history = {};
+        update_history(nodes);
     }
 
     void update_history(Vec<shared_ptr<Node>>& nodes) {
@@ -236,10 +270,14 @@ private:
 public:
     void route(Vec<shared_ptr<Node>>& nodes) {
         init(nodes);
-        update_history(nodes);
+        init_history(nodes);
         step2(nodes);
         step3(nodes);
         move_messages_between_sets(nodes);
         move_messages_within_sets(nodes);
+    }
+
+    vector<TimePoint>& get_history() {
+        return history;
     }
 };
