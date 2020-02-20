@@ -43,6 +43,13 @@ void Node::send_message_counts(unique_ptr<MessageCount> mc, int intermediate_des
     message_sent_count++;
 }
 
+// Special version of send_message_counts() for the first step of Algorithm2
+// the main reason is that message counts for this step and others need to be stored separately
+void Node::send_message_counts_algo2_step1(unique_ptr<MessageCount> mc, int intermediate_dest) {
+    nodes[intermediate_dest].lock()->add_also2_step1_message_count(move(mc));
+    message_sent_count++;
+}
+
 Message& Node::get_message(const function<bool(Message&)>& prerequisite) {
     for (auto& m : messages) {
         if (prerequisite(*m)) {
@@ -282,6 +289,10 @@ int Node::get_set_idx() {
     return get_set_from_node_id(nodes, this->global_idx);
 }
 
+void Node::add_also2_step1_message_count(unique_ptr<MessageCount> mc) {
+    this->algo2_step1_message_counts.push_back(move(mc));
+}
+
 void Node::add_received_message_count(unique_ptr<MessageCount> mc) {
     this->received_message_counts.push_back(move(mc));
 }
@@ -319,7 +330,7 @@ void Node::send_counts_for_ith_subset_locally(Vec<int> message_counts) {
                 message_counts[set_idx],
                 -1
         );
-        send_message_counts(move(mc), global_dest_idx);
+        send_message_counts_algo2_step1(move(mc), global_dest_idx);
     });
 }
 
@@ -333,12 +344,12 @@ void Node::step2_round1() {
 Vec<int> Node::sum_up_message_counts() {
     Vec<int> message_counts(set_size, 0);
     // sum up the number of messages W holds for i'th subset W' (where i is local idx of the curent node)
-    for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
+    for (auto it = algo2_step1_message_counts.begin(); it != algo2_step1_message_counts.end();) {
         auto& mc = *it;
         if (mc->msg_src == get_set_idx() && mc->info_dest == -1) {
             int dest_set_idx = mc->msg_dest;
             message_counts[dest_set_idx] += mc->msg_count;
-            it = received_message_counts.erase(it);
+            it = algo2_step1_message_counts.erase(it);
         } else {
             it++;
         }
@@ -357,7 +368,7 @@ void Node::broadcast_message_counts(Vec<int> message_counts) {
                 message_counts[i],
                 locked_node->get_node_idx()
         );
-        send_message_counts(move(mc), locked_node->get_node_idx());
+        send_message_counts_algo2_step1(move(mc), locked_node->get_node_idx());
     }
 }
 
@@ -368,22 +379,20 @@ void Node::step2_round2() {
     broadcast_message_counts(message_counts);
 }
 
-// construct bipartite graph G as follows.
-// set_size senders, set_size receivers. For each message W needs to send to W', add an edge from S to R
-void Node::step2_round3() {
+void Node::compute_set_to_set_graph() {
     Vec2<int> message_count( // from set W to set W'
             set_size,
             Vec<int>(set_size, 0)
     );
 
     // count total number of messages from each subset to each subset
-    for (auto it = received_message_counts.begin(); it != received_message_counts.end();) {
+    for (auto it = algo2_step1_message_counts.begin(); it != algo2_step1_message_counts.end();) {
         auto& mc = *it;
         int src_set_idx = mc->msg_src;
         int dest_set_idx = mc->msg_dest;
         message_count[src_set_idx][dest_set_idx] = mc->msg_count;
         // delete message_counts objects
-        it = received_message_counts.erase(it);
+        it = algo2_step1_message_counts.erase(it);
     }
 
     // graph's degree is set_size ^ 3, since each node needs to send and receive set_size^2 messages,
@@ -395,7 +404,7 @@ void Node::step2_round3() {
 // announce to all other nodes in current subset the number of message this node has destined for each subset W'
 // i.e. just compute sum of message counts for each subset W' and send set_size pieces of info to each of the nodes in the subset W
 // corollary 3.4 is used => the operation is done in 2 rounds
-void Node::step2_round4() {
+void Node::broadcast_message_counts_locally() {
     Vec<int> message_counts(set_size, 0);
 
     for (auto& message : messages) {
@@ -408,8 +417,15 @@ void Node::step2_round4() {
     );
 }
 
+// construct bipartite graph G as follows.
+// set_size senders, set_size receivers. For each message W needs to send to W', add an edge from S to R
+void Node::step2_round3() {
+    compute_set_to_set_graph();
+    broadcast_message_counts_locally();
+}
+
 // 2nd round of corollary 3.4, see comments for step2_round4.
-void Node::step2_round5() {
+void Node::step2_round4() {
     corollary_34_round2();
 }
 
@@ -485,7 +501,7 @@ Vec2<int> Node::build_inset_graph(Vec3<int> coloring) {
     return edge_counts;
 }
 
-void Node::step2_round6() {
+void Node::step2_round5() {
     auto inter_set_message_count = count_messages_inter_set();
     auto message_count = build_inter_set_graph(inter_set_message_count);
     // the we color the newly constructed bipartite graph (from each node of W to intermediate destination set R)
@@ -498,13 +514,13 @@ void Node::step2_round6() {
 }
 
 // 2nd round of Corollary 3.4. See comments for round 6.
-void Node::step2_round7() { // send messages within W only as needed
+void Node::step2_round6() { // send messages within W only as needed
     corollary_34_round4(2);
 }
 
 // By now we've achieved that each node holds exactly set_size messages with destination of W' (for each W')
 // Thus, current, node can send one message to each of the set_size nodes of W' (for each W')
-void Node::step2_round8() { // each node in in W sends one message to each node
+void Node::step2_round7() { // each node in in W sends one message to each node
     Vec<int> next_dest_idx_for_sets(set_size, 0);
 
     start_message_count();

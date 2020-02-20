@@ -117,10 +117,6 @@ private:
             node->step2_round7();
         }
         update_history(nodes);
-        for (auto& node : nodes) {
-            node->step2_round8();
-        }
-        update_history(nodes);
     }
 
     // for each pair of subsets W, W' move messages destined

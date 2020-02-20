@@ -52,6 +52,7 @@ private:
     int global_idx;
     Vec<std::unique_ptr<Message>> messages;
     Vec<std::unique_ptr<MessageCount>> received_message_counts;
+    Vec<std::unique_ptr<MessageCount>> algo2_step1_message_counts;
     Vec<std::weak_ptr<Node>> nodes; // list of all nodes in the clique
     Vec3<int> step2_coloring;
 
@@ -69,6 +70,8 @@ private:
     int get_global_id_from_local(int set_idx, int node_idx);
 
     void send_message(std::unique_ptr<Message> message, int intermediate_dest, int step_to_be_sent);
+
+    void send_message_counts_algo2_step1(std::unique_ptr<MessageCount> mc, int intermediate_dest);
 
     void send_message_counts(std::unique_ptr<MessageCount> mc, int intermediate_dest);
 
@@ -111,6 +114,9 @@ private:
             int local_src_idx, // from where
             int local_dest_idx // next dest
     );
+
+    void compute_set_to_set_graph();
+    void broadcast_message_counts_locally();
 
     void update_counts(
             Vec2<int>& message_counts, // message counts from a node in W to a set W'
@@ -167,6 +173,7 @@ public:
     void add_message(std::unique_ptr<Message> m);
     int get_node_idx();
     int get_set_idx();
+    void add_also2_step1_message_count(std::unique_ptr<MessageCount> mc);
     void add_received_message_count(std::unique_ptr<MessageCount> mc);
     void init(Vec<std::shared_ptr<Node>>& nodes_to_init);
 
@@ -177,7 +184,6 @@ public:
     void step2_round5();
     void step2_round6();
     void step2_round7();
-    void step2_round8();
 
     void step3_round1();
     void step3_round2();
