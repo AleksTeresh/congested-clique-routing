@@ -367,26 +367,24 @@ EMSCRIPTEN_BINDINGS(my_module) {
         emscripten::function("random_test", &random_test);
 }
 
+int test () {
+    test1();
+    test2();
+    test3();
+    test4();
+    test5();
+    test6();
+    test7();
 
-//
-//int main () {
-//    test1();
-//    test2();
-//    test3();
-//    test4();
-//    test5();
-//    test6();
-//    test7();
-//
-//    setbuf(stdout, nullptr);
-//    int test_count_per_size = 4;
-//    int max_size = 11;
-//    for (int i = 1; i <= max_size; i++) { // subset size
-//        printf("Started %d tests with %d nodes\n", test_count_per_size, i*i);
-//        for (int j = 0; j < test_count_per_size; j++) {
-//            random_test(i);
-//        }
-//    }
-//
-//    return 0;
-//}
+    setbuf(stdout, nullptr);
+    int test_count_per_size = 4;
+    int max_size = 11;
+    for (int i = 1; i <= max_size; i++) { // subset size
+        printf("Started %d tests with %d nodes\n", test_count_per_size, i*i);
+        for (int j = 0; j < test_count_per_size; j++) {
+            random_test(i);
+        }
+    }
+
+    return 0;
+}
