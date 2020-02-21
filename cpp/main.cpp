@@ -1,7 +1,10 @@
 #include <random>
 #include <cassert>
+#include <emscripten/bind.h>
 #include "node.cpp"
 #include "clique-router.cpp"
+
+using namespace emscripten;
 
 void check_arrived_messages(Vec<shared_ptr<Node>>& nodes) {
     for (auto& node : nodes) {
@@ -306,7 +309,7 @@ int test7() {
     return 0;
 }
 
-void random_test(int subset_size) {
+string random_test(int subset_size) {
     int set_size = subset_size * subset_size;
     Vec2<int> message_destinations(set_size, Vec<int>());
 
@@ -334,27 +337,34 @@ void random_test(int subset_size) {
     CliqueRouter cr;
     cr.route(nodes);
 
-    check_arrived_messages(nodes);
+    return cr.get_history_JSON();
+    // return cr.get_history();
 }
 
-int main() {
-    test1();
-    test2();
-    test3();
-    test4();
-    test5();
-    test6();
-    test7();
-
-    setbuf(stdout, nullptr);
-    int test_count_per_size = 4;
-    int max_size = 11;
-    for (int i = 1; i <= max_size; i++) { // subset size
-        printf("Started %d tests with %d nodes\n", test_count_per_size, i*i);
-        for (int j = 0; j < test_count_per_size; j++) {
-            random_test(i);
-        }
-    }
-
-    return 0;
+EMSCRIPTEN_BINDINGS(my_module) {
+        emscripten::function("random_test", &random_test);
 }
+
+
+//
+//int main () {
+//    test1();
+//    test2();
+//    test3();
+//    test4();
+//    test5();
+//    test6();
+//    test7();
+//
+//    setbuf(stdout, nullptr);
+//    int test_count_per_size = 4;
+//    int max_size = 11;
+//    for (int i = 1; i <= max_size; i++) { // subset size
+//        printf("Started %d tests with %d nodes\n", test_count_per_size, i*i);
+//        for (int j = 0; j < test_count_per_size; j++) {
+//            random_test(i);
+//        }
+//    }
+//
+//    return 0;
+//}

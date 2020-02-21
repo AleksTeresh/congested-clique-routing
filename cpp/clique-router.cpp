@@ -277,4 +277,9 @@ public:
     vector<TimePoint>& get_history() {
         return history;
     }
+
+    string get_history_JSON() {
+        json j_vec(history);
+        return j_vec.dump();
+    }
 };
