@@ -1,7 +1,7 @@
 #include <random>
 #include <cassert>
 #include <emscripten/bind.h>
-#include "node.cpp"
+#include "node.h"
 #include "clique-router.cpp"
 
 using namespace emscripten;
