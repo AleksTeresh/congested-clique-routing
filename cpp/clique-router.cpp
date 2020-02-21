@@ -9,6 +9,7 @@ struct NodeData {
     vector<Message> messages;
     vector<MessageCount> message_counts;
 
+    NodeData() {}
     NodeData(int id, vector<unique_ptr<Message>>& messages, vector<unique_ptr<MessageCount>>& message_counts) {
         this->id = id;
         for (auto& m : messages) {

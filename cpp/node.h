@@ -26,6 +26,7 @@ struct Message {
     int next_dest = -1; // node idx to which the message should be sent next (i.e. intermediate destination)
     int next_set = -1; // set idx to which the message should be sent next (i.e. intermediate destination)
 
+    Message() {}
     Message(int src, int dest) {
         this->src = src;
         this->final_dest = dest;
@@ -39,6 +40,7 @@ struct MessageCount {
     int msg_count = 0; // number of messages from msg_src to msg_dest
     int info_dest; // MessageCount struct is to be delivered to this dest (node idx)
 
+    MessageCount(){}
     MessageCount(int msg_src, int msg_dest, int msg_count, int info_dest) {
         this->msg_src = msg_src;
         this->msg_dest = msg_dest;
