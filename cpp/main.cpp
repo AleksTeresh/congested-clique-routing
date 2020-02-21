@@ -1,5 +1,6 @@
 #include <emscripten/bind.h>
 #include "test.cpp"
+#include "time-point.h"
 
 using namespace emscripten;
 

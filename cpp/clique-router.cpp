@@ -1,27 +1,7 @@
 #include "node.h"
+#include "time-point.h"
 
 using namespace std;
-
-struct NodeData {
-    int id;
-    vector<Message> messages;
-    vector<MessageCount> message_counts;
-
-    NodeData() {}
-    NodeData(int id, vector<unique_ptr<Message>>& messages, vector<unique_ptr<MessageCount>>& message_counts) {
-        this->id = id;
-        for (auto& m : messages) {
-            this->messages.push_back(*m);
-        }
-        for (auto& mc : message_counts) {
-            this->message_counts.push_back(*mc);
-        }
-    }
-};
-
-struct TimePoint {
-    vector<NodeData> nodes;
-};
 
 class CliqueRouter {
 private:
