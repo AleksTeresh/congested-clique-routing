@@ -1,8 +1,6 @@
 #include "node.h"
-#include "./lib/json.h"
 
 using namespace std;
-using nlohmann::json;
 
 struct NodeData {
     int id;
@@ -24,34 +22,6 @@ struct NodeData {
 struct TimePoint {
     vector<NodeData> nodes;
 };
-
-void to_json(json& j, const MessageCount& message_count) {
-    j = json{
-        {"msgSrc", message_count.msg_src},
-        {"msgDest", message_count.msg_dest},
-        {"msgCount", message_count.msg_count},
-        {"infoDest", message_count.info_dest}
-    };
-}
-
-void to_json(json& j, const Message& message) {
-    j = json{
-        {"src", message.src},
-        {"finalDest", message.final_dest}
-    };
-}
-
-void to_json(json& j, const NodeData& node) {
-    j = json{
-        {"id", node.id},
-        {"messages", node.messages},
-        {"messageCounts", node.message_counts}
-    };
-}
-
-void to_json(json& j, const TimePoint& tp) {
-    j = json{{"nodes", tp.nodes}};
-}
 
 class CliqueRouter {
 private:
@@ -277,10 +247,5 @@ public:
 
     vector<TimePoint>& get_history() {
         return history;
-    }
-
-    string get_history_JSON() {
-        json j_vec(history);
-        return j_vec.dump();
     }
 };
