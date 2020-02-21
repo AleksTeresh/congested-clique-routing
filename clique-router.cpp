@@ -226,6 +226,7 @@ private:
 
         for (auto& node : nodes) {
             int src_set_idx = node->get_set_idx();
+            assert(node->get_messages().size() == set_size * set_size);
             for (auto& message : node->get_messages()) {
                 int dest_set_idx = Node::get_set_from_node_id(nodes, message->final_dest);
                 message_counts[src_set_idx][dest_set_idx]++;
