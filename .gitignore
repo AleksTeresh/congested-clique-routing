@@ -1,3 +1,6 @@
 .idea
-web/gen
+.DS_Store
+web/dist/*.wasm
+web/dist/*.wast
+web/dist/*.js
 cpp/a.out
