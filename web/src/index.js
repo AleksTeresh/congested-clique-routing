@@ -33,6 +33,33 @@ function drawMatrix(graphHistoryPoint) {
         })
     }
 
+    const rows = drawRows(nodes)
+    const columns = drawColumns(nodes)
+
+    updateMatrix(graphHistoryPoint, rows)
+    return rows
+}
+
+function drawColumns(nodes) {
+    const columns = svg.selectAll(".column")
+        .data(nodes)
+        .enter().append("g")
+        .attr("class", "column")
+        .attr("transform", (_, i) => "translate(" + (width * i) + ")rotate(-90)")
+
+    columns.append("line")
+        .attr("x1", -width)
+
+    columns.append("text")
+        .attr("x", 6)
+        .attr("y", width / 2)
+        .attr("dy", ".32em")
+        .attr("text-anchor", "start")
+        .text((d) => d.id)
+    return columns
+}
+
+function drawRows(nodes) {
     const rows = svg.selectAll(".row")
         .data(nodes)
         .enter().append("g")
@@ -49,32 +76,20 @@ function drawMatrix(graphHistoryPoint) {
         .attr("dy", ".32em")
         .attr("text-anchor", "end")
         .text((d) => d.id)
-
-    const column = svg.selectAll(".column")
-        .data(nodes)
-        .enter().append("g")
-        .attr("class", "column")
-        .attr("transform", (_, i) => "translate(" + (width * i) + ")rotate(-90)")
-
-    column.append("line")
-        .attr("x1", -width)
-
-    column.append("text")
-        .attr("x", 6)
-        .attr("y", width / 2)
-        .attr("dy", ".32em")
-        .attr("text-anchor", "start")
-        .text((d) => d.id)
-
-    updateMatrix(graphHistoryPoint, rows)
     return rows
 }
 
-
 function updateMatrix(graphHistoryPoint, row) {
     const nodes = graphHistoryPoint.nodes
+    const emptyMatrix = initMatrix(nodes)
+    const matrix = computeMatrix(nodes, emptyMatrix)
+
+    row.data(matrix)
+        .each(updateRow)
+}
+
+function initMatrix(nodes) {
     const matrix = []
-    // Compute index per node.
     for (let i = 0; i < nodes.length; i++) {
         const node = {
             ...nodes[i],
@@ -85,7 +100,10 @@ function updateMatrix(graphHistoryPoint, row) {
         matrix[i] = d3.range(n)
             .map((j) => ({x: j, y: i, z: 0}))
     }
+    return matrix
+}
 
+function computeMatrix(nodes, matrix) {
     // Convert links to matrix count character occurrences.
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
@@ -96,15 +114,7 @@ function updateMatrix(graphHistoryPoint, row) {
             nodes[message.finalDest].destCount++
         }
     }
-
-    // Precompute the orders.
-    const orders = {
-        id: d3.range(n).sort((a, b) =>
-            { return d3.ascending(nodes[a].id, nodes[b].id) })
-    }
-
-    row.data(matrix)
-        .each(updateRow)
+    return matrix
 }
 
 function createRow(row) {
@@ -152,6 +162,28 @@ function getCppData() {
     return data
 }
 
+function handlePrevClick() {
+    currStep--
+    updateMatrix(data[currStep], rows)
+
+    if (currStep === 0) {
+        prevButton.disabled = true
+    }
+
+    nextButton.disabled = false
+}
+
+function handleNextClick() {
+    currStep++
+    updateMatrix(data[currStep], rows)
+
+    if (currStep === 16) {
+        nextButton.disabled = true
+    }
+
+    prevButton.disabled = false
+}
+
 Module.onRuntimeInitialized = () => {
     const data = getCppData()
 
@@ -165,27 +197,10 @@ Module.onRuntimeInitialized = () => {
 
     prevButton.addEventListener(
         "click",
-        () => {
-            currStep--
-            updateMatrix(data[currStep], rows)
-
-            if (currStep === 0) {
-                prevButton.disabled = true
-            }
-
-            nextButton.disabled = false
-        });
-
+        handlePrevClick
+    )
     nextButton.addEventListener(
         "click",
-        () => {
-            currStep++
-            updateMatrix(data[currStep], rows)
-
-            if (currStep === 16) {
-                nextButton.disabled = true
-            }
-
-            prevButton.disabled = false
-        });
+        handleNextClick
+    )
 }
