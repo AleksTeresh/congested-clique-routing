@@ -24,11 +24,11 @@ const svg = d3.select("body")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
 function drawMatrix(graphHistoryPoint) {
-    const n = graphHistoryPoint.nodes.size()
+    const n = graphHistoryPoint.nodes.length
     const nodes = []
     for (let i = 0; i < n; i++) {
         nodes.push({
-            id: graphHistoryPoint.nodes.get(i).id,
+            id: graphHistoryPoint.nodes[i].id,
             cells: (new Array(n))
         })
     }
@@ -75,9 +75,9 @@ function updateMatrix(graphHistoryPoint, row) {
     const nodes = graphHistoryPoint.nodes
     const matrix = []
     // Compute index per node.
-    for (let i = 0; i < nodes.size(); i++) {
+    for (let i = 0; i < nodes.length; i++) {
         const node = {
-            ...nodes.get(i),
+            ...nodes[i],
             index: i,
             srcCount: 0,
             destCount: 0
@@ -87,20 +87,20 @@ function updateMatrix(graphHistoryPoint, row) {
     }
 
     // Convert links to matrix count character occurrences.
-    for (let i = 0; i < nodes.size(); i++) {
-        const node = nodes.get(i)
-        for (let j = 0; j < node.messages.size(); j++) {
-            const message = node.messages.get(j)
-            matrix[node.id][message.final_dest].z++
-            nodes.get(node.id).srcCount++
-            nodes.get(message.final_dest).destCount++
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i]
+        for (let j = 0; j < node.messages.length; j++) {
+            const message = node.messages[j]
+            matrix[node.id][message.finalDest].z++
+            nodes[node.id].srcCount++
+            nodes[message.finalDest].destCount++
         }
     }
 
     // Precompute the orders.
     const orders = {
         id: d3.range(n).sort((a, b) =>
-            { return d3.ascending(nodes.get(a).id, nodes.get(b).id) })
+            { return d3.ascending(nodes[a].id, nodes[b].id) })
     }
 
     row.data(matrix)
@@ -126,11 +126,37 @@ function updateRow(row) {
         .style("fill-opacity", (d) => z(d.z))
 }
 
-Module.onRuntimeInitialized = () => {
+function getCppData() {
     const res = Module.random_test(setSize)
+    const data = []
+    for (let i = 0; i < res.size(); i++) {
+        const dataPoint = res.get(i)
+        const nodes = []
+        for (let j = 0; j < n; j++) {
+            const node = dataPoint.nodes.get(j)
+            const messages = []
+            for (let e = 0; e < node.messages.size(); e++) {
+                const m = node.messages.get(e)  
+                messages.push({
+                    src: m.src,
+                    finalDest: m.final_dest
+                })   
+            }
+            nodes.push({
+                id: node.id,
+                messages: messages
+            })
+        }
+        data.push({nodes})
+    }
+    return data
+}
+
+Module.onRuntimeInitialized = () => {
+    const data = getCppData()
 
     let currStep = 0
-    const rows = drawMatrix(res.get(currStep))
+    const rows = drawMatrix(data[currStep])
 
     const prevButton = document.getElementById('prevBtn')
     prevButton.disabled = true
@@ -141,7 +167,7 @@ Module.onRuntimeInitialized = () => {
         "click",
         () => {
             currStep--
-            updateMatrix(res.get(currStep), rows)
+            updateMatrix(data[currStep], rows)
 
             if (currStep === 0) {
                 prevButton.disabled = true
@@ -154,7 +180,7 @@ Module.onRuntimeInitialized = () => {
         "click",
         () => {
             currStep++
-            updateMatrix(res.get(currStep), rows)
+            updateMatrix(data[currStep], rows)
 
             if (currStep === 16) {
                 nextButton.disabled = true
