@@ -1,4 +1,6 @@
 import * as d3 from 'd3'
+import React from 'react'
+import ReactDOM from 'react-dom'
 
 const margin = {
     top: 80,
@@ -136,7 +138,7 @@ function updateRow(row) {
         .style("fill-opacity", (d) => z(d.z))
 }
 
-function getCppData() {
+function getCppData(Module) {
     const res = Module.random_test(setSize)
     const data = []
     for (let i = 0; i < res.size(); i++) {
@@ -184,8 +186,10 @@ function handleNextClick() {
     prevButton.disabled = false
 }
 
-Module.onRuntimeInitialized = () => {
-    const data = getCppData()
+ReactDOM.render(<div>My application goes here</div>, document.getElementById('root'))
+
+InitRuntime().then((Module) => {
+    const data = getCppData(Module)
 
     let currStep = 0
     const rows = drawMatrix(data[currStep])
@@ -203,4 +207,4 @@ Module.onRuntimeInitialized = () => {
         "click",
         handleNextClick
     )
-}
+})
