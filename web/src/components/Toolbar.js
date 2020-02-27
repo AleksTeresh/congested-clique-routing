@@ -7,6 +7,7 @@ export default function Toolbar({
   handlePrev,
   handleNext,
   tentativeSetSize,
+  setSize,
   setTentativeSetSize,
   setSetSize,
   loadData
@@ -52,8 +53,11 @@ export default function Toolbar({
         <button
           style={buttonStyle}
           onClick={() => {
-            setSetSize(Number(tentativeSetSize))
-            loadData(Number(tentativeSetSize))
+            if (tentativeSetSize === setSize) {
+              loadData(Number(tentativeSetSize))
+            } else {
+              setSetSize(Number(tentativeSetSize))
+            }
           }}
           id="computeBtn">Compute routing</button>
       </div>

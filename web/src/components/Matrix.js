@@ -31,7 +31,8 @@ function computeMatrix(nodes, matrix) {
 }
 
 export default function Matrix({
-  graphHistoryPoint
+  graphHistoryPoint,
+  colorUpperLimit
 }) {
   const emptyMatrix = initMatrix(graphHistoryPoint.nodes)
   const matrix = computeMatrix(graphHistoryPoint.nodes, emptyMatrix)
@@ -47,7 +48,7 @@ export default function Matrix({
   const n = graphHistoryPoint.nodes.length
 
   const z = d3.scaleLinear()
-    .domain([0, n])
+    .domain([0, colorUpperLimit])
     .clamp(true)
 
   return (
