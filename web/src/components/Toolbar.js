@@ -11,19 +11,27 @@ export default function Toolbar({
   setSetSize,
   loadData
 }) {
+  const buttonStyle = { margin: '20px', marginTop: '5px', fontSize: '15px' }
   return (
     <div style={{ margin: '80px', marginTop: '20px' }}>
-      <div style={{ margin: '20px' }}>
+      <div style={{ width: '500px' }}>
         <button
-          style={{ margin: '5px' }}
+          style={buttonStyle}
           disabled={round === 0}
           onClick={handlePrev}
-          id="prevBtn">Prev round</button>
+          id="prevBtn">
+          Prev round
+        </button>
         <button
-          style={{ margin: '5px' }}
+          style={buttonStyle}
           disabled={round === NUM_OF_ROUNDS}
           onClick={handleNext}
-          id="nextBtn">Next round</button>
+          id="nextBtn">
+          Next round
+        </button>
+        <div style={{ float: 'right', marginTop: '5px'}}>
+          <label>{'Round No: ' + round}</label>
+        </div>
       </div>
       <div>
         <label id="roundLabel"></label>
@@ -40,8 +48,9 @@ export default function Toolbar({
           className="slider"
           id="nodesRange" />
       </div>
-      <div style={{ margin: '20px' }}>
+      <div>
         <button
+          style={buttonStyle}
           onClick={() => {
             setSetSize(Number(tentativeSetSize))
             loadData(Number(tentativeSetSize))

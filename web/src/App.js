@@ -14,6 +14,7 @@ function App() {
     InitRuntime().then((Module) => {
       const d = computeRouting(Module, setSize)
       setData(d)
+      setRound(0)
     })
   }
 
