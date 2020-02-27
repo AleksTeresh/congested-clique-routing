@@ -38,7 +38,7 @@ export default function Matrix({
   const matrix = computeMatrix(graphHistoryPoint.nodes, emptyMatrix)
 
   const margin = {
-    top: 80,
+    top: 30,
     right: 0,
     bottom: 10,
     left: 80
