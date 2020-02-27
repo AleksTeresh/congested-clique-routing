@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import * as d3 from 'd3'
 import { computeRouting } from './cppClient'
 
-const n = 16
-
 function initMatrix(nodes) {
   const matrix = []
   for (let i = 0; i < nodes.length; i++) {
@@ -13,7 +11,7 @@ function initMatrix(nodes) {
           srcCount: 0,
           destCount: 0
       }
-      matrix[i] = d3.range(n)
+      matrix[i] = d3.range(nodes.length)
           .map((j) => ({x: j, y: i, z: 0}))
   }
   return matrix
@@ -48,14 +46,6 @@ function Matrix({
   const width = 36
   const height = 36
   const n = graphHistoryPoint.nodes.length
-  
-  const nodes = []
-  for (let i = 0; i < n; i++) {
-      nodes.push({
-          id: graphHistoryPoint.nodes[i].id,
-          cells: (new Array(n))
-      })
-  }
 
   const z = d3.scaleLinear()
     .domain([0, n])
@@ -103,14 +93,23 @@ function Matrix({
   )
 }
 
+const NUM_OF_ROUNDS = 16
+
 function App() {
+  const [tentativeSetSize, setTentativeSetSize] = useState(4)
+  const [setSize, setSetSize] = useState(4)
   const [round, setRound] = useState(0)
   const [data, setData] = useState([{ nodes: [] }]) 
-  useEffect(() => {
+
+  const loadData = (setSize) => {
     InitRuntime().then((Module) => {
-      const d = computeRouting(Module, 4)
+      const d = computeRouting(Module, setSize)
       setData(d)
     })
+  }
+
+  useEffect(() => {
+    loadData(setSize)
   }, [])
 
   const handlePrev = () => setRound(round - 1)
@@ -125,7 +124,7 @@ function App() {
           onClick={handlePrev}
           id="prevBtn">Prev</button>
         <button
-          disabled={round === n}
+          disabled={round === NUM_OF_ROUNDS}
           onClick={handleNext}
           id="nextBtn">Next</button>
       </div>
@@ -133,11 +132,23 @@ function App() {
         <label id="roundLabel"></label>
       </div>
       <div>
-        <label id="numberOfNodes"></label>
-        <input type="range" min="1" max="100" value="50" className="slider" id="nodesRange" />
+        <label id="numberOfNodes">{'Round ' + tentativeSetSize}</label>
+        <input
+          onInput={(ev) => setTentativeSetSize(Number(ev.target.value))}
+          type="range"
+          min="1"
+          max="9"
+          value={tentativeSetSize}
+          className="slider"
+          id="nodesRange" />
       </div>
       <div>
-        <button id="computeBtn">Compute</button>
+        <button
+          onClick={() => {
+            setSetSize(Number(tentativeSetSize))
+            loadData(Number(tentativeSetSize))
+          }}
+          id="computeBtn">Compute</button>
       </div>
     </div>
   );
