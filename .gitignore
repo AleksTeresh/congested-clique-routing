@@ -4,3 +4,4 @@ web/dist/*.wasm
 web/dist/*.wast
 web/dist/*.js
 cpp/a.out
+build
