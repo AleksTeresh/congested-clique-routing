@@ -1,4 +1,6 @@
 #include "node.h"
+#include "test.h"
+#include "time-point.h"
 #include <emscripten/bind.h>
 
 using namespace emscripten;
