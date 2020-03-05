@@ -1,6 +1,9 @@
 #ifndef CONGESTED_CLIQUE_ROUTING_TIME_POINT_H
 #define CONGESTED_CLIQUE_ROUTING_TIME_POINT_H
 
+#include "node.h"
+#include <vector>
+
 struct NodeData {
     int id;
     std::vector<Message> messages;

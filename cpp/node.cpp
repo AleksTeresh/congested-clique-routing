@@ -1,9 +1,8 @@
+#include "color.h"
+#include "util.h"
 #include <unordered_map>
 #include <cmath>
 #include <numeric>
-#include "color.cpp"
-#include "node.h"
-#include "util.h"
 
 using namespace std;
 

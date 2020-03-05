@@ -1,7 +1,9 @@
+#include "node.h"
+#include "clique-router.h"
 #include <random>
 #include <cassert>
-#include "node.h"
-#include "clique-router.cpp"
+
+using namespace std;
 
 void check_arrived_messages(Vec<shared_ptr<Node>>& nodes) {
     for (auto& node : nodes) {
