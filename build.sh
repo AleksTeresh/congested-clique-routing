@@ -1,7 +1,17 @@
 #!/bin/sh
 
-SRC_CPP_FILES="../cpp/test.cpp ../cpp/node.cpp ../cpp/clique-router.cpp ../cpp/color.cpp ../cpp/emscripten-bindings.cpp"
-EMSCRIPTEN_FLAGS="-s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME=\"InitRuntime\" -s ENVIRONMENT=web  -s -o main.js"
+SRC_CPP_FILES="
+  ../cpp/test.cpp
+  ../cpp/node.cpp
+  ../cpp/clique-router.cpp
+  ../cpp/color.cpp
+  ../cpp/emscripten-bindings.cpp"
+EMSCRIPTEN_FLAGS="
+  -s WASM=1
+  -s MODULARIZE=1
+  -s EXPORT_NAME=\"InitRuntime\"
+  -s ENVIRONMENT=web
+  -s -o main.js"
 
 mkdir -p ./build
 cd build
