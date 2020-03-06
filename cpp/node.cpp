@@ -264,6 +264,10 @@ Vec<unique_ptr<MessageCount>>& Node::get_message_counts() {
     return received_message_counts;
 }
 
+Vec<unique_ptr<MessageCount>>& Node::get_algo2_message_counts() {
+    return algo2_step1_message_counts;
+}
+
 void Node::add_messages(Vec<int>& new_messages) {
     for (int message : new_messages) {
         add_message(message);

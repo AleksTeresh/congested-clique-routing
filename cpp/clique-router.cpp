@@ -20,7 +20,11 @@ void CliqueRouter::update_history(Vec<shared_ptr<Node>>& nodes) {
     TimePoint tp;
     for (auto& node : nodes) {
         auto raw = node.get();
-        NodeData nd(raw->get_node_idx(), raw->get_messages(), raw->get_message_counts());
+        NodeData nd(
+                raw->get_node_idx(),
+                raw->get_messages(),
+                raw->get_message_counts(),
+                raw->get_algo2_message_counts());
         tp.nodes.push_back(nd);
     }
     history.push_back(tp);

@@ -36,7 +36,7 @@ struct Message {
 // struct used to send info related to message counts between nodes
 struct MessageCount {
     int msg_src; // the struct reports number of messages from this src (node or set idx)
-    int msg_dest; // the struct report number of messages with destination to this (node or set idx)
+    int msg_dest; // the struct reports number of messages with destination to this (node or set idx)
     int msg_count = 0; // number of messages from msg_src to msg_dest
     int info_dest; // MessageCount struct is to be delivered to this dest (node idx)
 
@@ -169,6 +169,7 @@ public:
 
     Vec<std::unique_ptr<Message>>& get_messages();
     Vec<std::unique_ptr<MessageCount>>& get_message_counts();
+    Vec<std::unique_ptr<MessageCount>>& get_algo2_message_counts();
 
     void add_messages(Vec<int>& new_messages);
     void add_message(int message_dest);
