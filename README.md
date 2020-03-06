@@ -1,16 +1,53 @@
 # Congested clique routing
-Implementation of the [Optimal Deterministic Routing algorithm on the Congested Clique](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf) 
+Implementation and visualization of the [Optimal Deterministic Routing algorithm on the Congested Clique](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf)
 
 ## Getting started
 
-Compile the program using at least C++17 standard e.g.
+[Install Emscripten](https://emscripten.org/docs/getting_started/downloads.html) and activate necessary environment variables in your terminal
+
+Then run the build script
 
 ```console
-c++ --std=c++17 ./main.cpp
+./build.sh
 ```
 
-Executing the compiled output will run several tests on both hardcoded and randomly generated inputs (see main.cpp).
+Finally start local server with e.g.
+
+```console
+npx serve -d ./web/dist/
+```
+
+## Building C++ sources
+
+Navigate to `cpp` directory and compile the sources using `make`
+
+```console
+cd ./cpp
+make
+```
+
+Executing the compiled output will run several tests on both hardcoded and randomly generated inputs (see `test.cpp`).
+
+## Developing web part
+
+After navigating to `web` directory, install required dependencies
+
+```console
+npm install
+```
+
+To enable webpack to automatically rebuild on every change to source code run
+
+```console
+npm run watch
+```
+
+Finally, start-up a local server with e.g.
+
+```console
+npx serve -d ./dist
+```
 
 ## Algorithm
 
-An alternative description of the algorithm, which might be more useful for the purpose of implementation can be found [here](https://alekte.com/congested-clique-routing/)
+An alternative description of the algorithm, which might be more useful for the purpose of implementation can be found [here](https://github.com/AleksTeresh/congested-clique-routing/blob/master/algorithm.Rmd)
