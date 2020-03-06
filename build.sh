@@ -21,4 +21,5 @@ mv main.js ../web/dist/
 mv main.wasm ../web/dist/
 
 cd ../web
+npm install
 npm run build
