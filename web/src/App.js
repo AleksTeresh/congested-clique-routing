@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Matrix from './components/Matrix'
 import Toolbar from './components/Toolbar'
+import DataColumn from './components/DataColumn'
 
 import { computeRouting } from './cppClient'
 
@@ -17,6 +18,17 @@ function groupPerSubclass(currRoundData, setSize) {
         return acc
     }, initGroupedNodes)
   }
+}
+
+function getMaxSizeOfProperty(data, property) {
+  return data.reduce((acc, p) => Math.max(
+    acc,
+    p.nodes.reduce((accInner, s) =>
+      Math.max(
+        accInner,
+        s[property].length
+      ), 0)
+  ), 0)
 }
 
 function App() {
@@ -37,7 +49,6 @@ function App() {
 
   useEffect(() => {
     loadData(setSize)
-    // setGroupedData(groupPerSubclass(currRoundData, setSize))
   }, [setSize])
   useEffect(() => {
     setGroupedData(groupPerSubclass(currRoundData, setSize))
@@ -46,10 +57,21 @@ function App() {
   const handlePrev = () => setRound(round - 1)
   const handleNext = () => setRound(round + 1)
 
+  const maxMessagesSize = getMaxSizeOfProperty(data, 'messages')
+  // const maxMetaMessagesSize = getMaxSizeOfProperty(data, 'metaMessages')
+
   return (
     <div className="App">
-      <Matrix graphHistoryPoint={currRoundData} colorUpperLimit={setSize * setSize} />
-      <Matrix graphHistoryPoint={groupedData} colorUpperLimit={setSize * setSize * setSize}/>
+      <DataColumn
+        nodes={currRoundData.nodes}
+        colorUpperLimit={maxMessagesSize}
+        propertyToVisualize={'messages'} />
+      <Matrix
+        graphHistoryPoint={currRoundData}
+        colorUpperLimit={setSize * setSize} />
+      <Matrix
+        graphHistoryPoint={groupedData}
+        colorUpperLimit={setSize * setSize * setSize}/>
       <Toolbar
         round={round}
         handlePrev={handlePrev}
@@ -58,8 +80,7 @@ function App() {
         setSize={setSize}
         setTentativeSetSize={setTentativeSetSize}
         setSetSize={setSetSize}
-        loadData={loadData}
-      />
+        loadData={loadData} />
     </div>
   );
 }

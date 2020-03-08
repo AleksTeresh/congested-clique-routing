@@ -8,6 +8,7 @@ export function computeRouting(Module, setSize) {
       for (let j = 0; j < n; j++) {
           const node = dataPoint.nodes.get(j)
           const messages = []
+          const metaMessages = []
           for (let e = 0; e < node.messages.size(); e++) {
               const m = node.messages.get(e)  
               messages.push({
@@ -15,9 +16,16 @@ export function computeRouting(Module, setSize) {
                   finalDest: m.final_dest
               })   
           }
+          for (let e = 0; e < node.message_counts.size(); e++) {
+            const m = node.message_counts.get(e)  
+            metaMessages.push({
+                src: m.msg_src,
+            })   
+        }
           nodes.push({
               id: node.id,
-              messages: messages
+              messages: messages,
+              metaMessages: metaMessages
           })
       }
       data.push({nodes})

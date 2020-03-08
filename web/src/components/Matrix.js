@@ -41,7 +41,7 @@ export default function Matrix({
     top: 30,
     right: 0,
     bottom: 10,
-    left: 80
+    left: 30
   }
   const width = 36
   const height = 36
