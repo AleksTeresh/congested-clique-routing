@@ -58,7 +58,6 @@ function App() {
   const handleNext = () => setRound(round + 1)
 
   const maxMessagesSize = getMaxSizeOfProperty(data, 'messages')
-  // const maxMetaMessagesSize = getMaxSizeOfProperty(data, 'metaMessages')
 
   return (
     <div className="App">
