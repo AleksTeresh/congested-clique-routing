@@ -87,7 +87,7 @@ export default function Visualization({
     emptyGroupedMatrix
   )
   return (
-    <div>
+    <div style={{ display: 'flex' }}>
       <Matrix
         data={column}
         colorUpperLimit={maxMessagesSize}

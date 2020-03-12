@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Toolbar from './components/Toolbar'
 import Visualization from './components/Visualization'
+import Textbox from './components/Textbox'
 
+import texts from './texts'
 import { computeRouting } from './cppClient'
 
 function App() {
@@ -25,25 +27,31 @@ function App() {
   const handlePrev = () => setRound(round - 1)
   const handleNext = () => setRound(round + 1)
 
-  const wrappperStyle = {
+  const visualizationStyle = {
     marginLeft: 'auto',
-    marginRight: 'auto',
+    marginRight: '20px',
     maxWidth: '1200px',
     width: 'fit-content'
   }
+  const wrappperStyle = { display: 'flex' }
 
   return (
     <div className="App" style={wrappperStyle}>
-      <Visualization
-        data={data}
+      <Textbox
+        texts={texts}
         round={round} />
-      <Toolbar
-        round={round}
-        handlePrev={handlePrev}
-        handleNext={handleNext}
-        setSize={setSize}
-        setSetSize={setSetSize}
-        loadData={loadData} />
+      <div style={visualizationStyle}>
+        <Visualization
+          data={data}
+          round={round} />
+        <Toolbar
+          round={round}
+          handlePrev={handlePrev}
+          handleNext={handleNext}
+          setSize={setSize}
+          setSetSize={setSetSize}
+          loadData={loadData} />
+      </div>
     </div>
   )
 }

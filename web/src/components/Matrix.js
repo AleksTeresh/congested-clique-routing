@@ -25,6 +25,7 @@ export default function Matrix({
     .clamp(true)
   return (
     <svg
+      style={{ alignSelf: 'flex-end' }}
       width={width * columnCount + margin.left + margin.right}
       height={height * n + margin.top + margin.bottom}>
         <g transform={"translate(" + margin.left + "," + margin.top + ")"}>
