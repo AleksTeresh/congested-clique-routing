@@ -1,20 +1,9 @@
 import React from 'react'
 import * as d3 from 'd3'
 
-function initMatrix(nodes) {
-  const matrix = []
-  for (let i = 0; i < nodes.length; i++) {
-      const node = {
-          ...nodes[i],
-          index: i,
-          count: 0,
-      }
-      matrix[i] = {x: 0, y: i, z: 0}
-  }
-  return matrix
-}
+import { initMatrix } from '../util/matrix'
 
-function computeMatrix(nodes, matrix, propertyToVisualize) {
+function computeColumn(nodes, matrix, propertyToVisualize) {
   // Convert links to matrix count character occurrences.s
   for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i]
@@ -31,8 +20,11 @@ export default function DataColumn({
   colorUpperLimit,
   propertyToVisualize
 }) {
-  const emptyMatrix = initMatrix(nodes)
-  const data = computeMatrix(
+  const emptyMatrix = initMatrix(
+    nodes,
+    (rowIdx) => ({ x: 0, y: rowIdx, z: 0 })
+  )
+  const data = computeColumn(
     nodes,
     emptyMatrix,
     propertyToVisualize

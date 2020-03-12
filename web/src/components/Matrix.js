@@ -1,20 +1,7 @@
 import React from 'react'
 import * as d3 from 'd3'
 
-function initMatrix(nodes) {
-  const matrix = []
-  for (let i = 0; i < nodes.length; i++) {
-      const node = {
-          ...nodes[i],
-          index: i,
-          srcCount: 0,
-          destCount: 0
-      }
-      matrix[i] = d3.range(nodes.length)
-          .map((j) => ({x: j, y: i, z: 0}))
-  }
-  return matrix
-}
+import { initMatrix } from '../util/matrix'
 
 function computeMatrix(nodes, matrix) {
   // Convert links to matrix count character occurrences.
@@ -34,8 +21,14 @@ export default function Matrix({
   graphHistoryPoint,
   colorUpperLimit
 }) {
-  const emptyMatrix = initMatrix(graphHistoryPoint.nodes)
-  const matrix = computeMatrix(graphHistoryPoint.nodes, emptyMatrix)
+  const { nodes } = graphHistoryPoint
+  const initMatrixRow = (rowIdx) => d3.range(nodes.length)
+    .map((j) => ({x: j, y: rowIdx, z: 0}))
+  const emptyMatrix = initMatrix(
+    graphHistoryPoint.nodes,
+    initMatrixRow
+  )
+  const matrix = computeMatrix(nodes, emptyMatrix)
 
   const margin = {
     top: 30,
@@ -45,7 +38,7 @@ export default function Matrix({
   }
   const width = 36
   const height = 36
-  const n = graphHistoryPoint.nodes.length
+  const n = nodes.length
 
   const z = d3.scaleLinear()
     .domain([0, colorUpperLimit])
@@ -57,13 +50,13 @@ export default function Matrix({
       height={height * n + margin.top + margin.bottom}>
         <g transform={"translate(" + margin.left + "," + margin.top + ")"}>
           {
-            matrix.map((node, nodeIdx) => (
+            matrix.map((cells, rowIdx) =>
               <g
-                key={nodeIdx}
+                key={rowIdx}
                 className="row"
-                transform={"translate(0," + (width * nodeIdx) + ")"}>
+                transform={"translate(0," + (width * rowIdx) + ")"}>
                 {
-                  node.map((cell, cellIdx) => (
+                  cells.map((cell, cellIdx) => (
                     <rect
                       key={cellIdx}
                       className="cell"
@@ -75,18 +68,18 @@ export default function Matrix({
                   ))
                 }
                 <line x2={width} />
-                <text x={-6} y={width / 2} dy=".32em" textAnchor="end">{nodeIdx}</text>
+                <text x={-6} y={width / 2} dy=".32em" textAnchor="end">{rowIdx}</text>
               </g>
-            ))
+            )
           }
           {
-            matrix.map((node, nodeIdx) => (
+            matrix.map((col, colIdx) => (
               <g
-                key={nodeIdx}
+                key={colIdx}
                 className="column"
-                transform={"translate(" + (width * nodeIdx) + ")rotate(-90)"}>
+                transform={"translate(" + (width * colIdx) + ")rotate(-90)"}>
                 <line x1={-width} />
-                <text x={6} y={width / 2} dy=".32em" textAnchor="start">{nodeIdx}</text>
+                <text x={6} y={width / 2} dy=".32em" textAnchor="start">{colIdx}</text>
               </g>
             ))
           }

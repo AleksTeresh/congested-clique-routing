@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import Matrix from './components/Matrix'
 import Toolbar from './components/Toolbar'
-import DataColumn from './components/DataColumn'
+import Visualization from './components/Visualization'
 
 import { computeRouting } from './cppClient'
 
@@ -59,18 +58,19 @@ function App() {
 
   const maxMessagesSize = getMaxSizeOfProperty(data, 'messages')
 
+  const wrappperStyle = {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    maxWidth: '1000px'
+  }
+
   return (
-    <div className="App">
-      <DataColumn
-        nodes={currRoundData.nodes}
-        colorUpperLimit={maxMessagesSize}
-        propertyToVisualize={'messages'} />
-      <Matrix
-        graphHistoryPoint={currRoundData}
-        colorUpperLimit={setSize * setSize} />
-      <Matrix
-        graphHistoryPoint={groupedData}
-        colorUpperLimit={setSize * setSize * setSize}/>
+    <div className="App" style={wrappperStyle}>
+      <Visualization
+        currRoundData={currRoundData}
+        maxMessagesSize={maxMessagesSize}
+        groupedData={groupedData}
+        setSize={setSize} />
       <Toolbar
         round={round}
         handlePrev={handlePrev}
