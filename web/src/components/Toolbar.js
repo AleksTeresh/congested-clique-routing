@@ -5,7 +5,14 @@ const MAX_NUM_OF_ROUNDS = 16
 const buttonStyle = {
   margin: '20px',
   marginTop: '5px',
-  fontSize: '15px'
+  fontSize: '15px',
+  lineHeight: '2.5',
+  padding: '0 20px',
+  fontSize: '1rem',
+  border: 0,
+  borderRadius: '10px',
+  backgroundColor: '#f5f4f2',
+  boxShadow: 'inset 1px 1px 1px rgba(255, 255, 255, .6), inset -1px -1px 1px rgba(0, 0, 0, .6)'
 }
 const wrapperStyle = {
   margin: '80px',
@@ -90,20 +97,20 @@ function PrevNextButtons({
   }
   return (
     <div style={nextPrevButtonStyle}>
-      <button
+      <input
+        type="button"
         style={buttonStyle}
         disabled={round === 0}
         onClick={handlePrev}
-        id="prevBtn">
-        Prev round
-      </button>
-      <button
+        value="Prev round"
+        id="prevBtn" />
+      <input
+        type="button"
         style={buttonStyle}
         disabled={round === MAX_NUM_OF_ROUNDS}
         onClick={handleNext}
-        id="nextBtn">
-        Next round
-      </button>
+        value="Next round"
+        id="nextBtn"/>
       <div style={roundIndicatorStyle}>
         <label>{'Round No: ' + round}</label>
       </div>
