@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 const MAX_NUM_OF_ROUNDS = 16
 
@@ -22,12 +22,12 @@ export default function Toolbar({
   round,
   handlePrev,
   handleNext,
-  tentativeSetSize,
   setSize,
-  setTentativeSetSize,
   setSetSize,
   loadData
 }) {
+  const [tentativeSetSize, setTentativeSetSize] = useState(4)
+
   return (
     <div style={wrapperStyle}>
       <PrevNextButtons
@@ -38,7 +38,8 @@ export default function Toolbar({
         setSize={setSize}
         setSetSize={setSetSize}
         tentativeSetSize={tentativeSetSize}
-        setTentativeSetSize={setTentativeSetSize} />
+        setTentativeSetSize={setTentativeSetSize}
+        loadData={loadData} />
     </div>
   )
 }
@@ -47,7 +48,8 @@ function InputControls({
   setSize,
   setSetSize,
   tentativeSetSize,
-  setTentativeSetSize
+  setTentativeSetSize,
+  loadData
 }) {
   return <>
     <div style={inputControlsWrapperStyle}>

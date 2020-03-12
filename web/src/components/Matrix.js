@@ -1,34 +1,11 @@
 import React from 'react'
 import * as d3 from 'd3'
 
-import { initMatrix } from '../util/matrix'
-
-function computeMatrix(nodes, matrix) {
-  // Convert links to matrix count character occurrences.
-  for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i]
-      for (let j = 0; j < node.messages.length; j++) {
-          const message = node.messages[j]
-          matrix[node.id][message.finalDest].z++
-      }
-  }
-  return matrix
-}
-
 export default function Matrix({
-  graphHistoryPoint,
+  data,
   colorUpperLimit,
   cellSize
 }) {
-  const { nodes } = graphHistoryPoint
-  const initMatrixRow = (rowIdx) => d3.range(nodes.length)
-    .map((j) => ({x: j, y: rowIdx, z: 0}))
-  const emptyMatrix = initMatrix(
-    graphHistoryPoint.nodes,
-    initMatrixRow
-  )
-  const matrix = computeMatrix(nodes, emptyMatrix)
-
   const margin = {
     top: 30,
     right: 0,
@@ -36,21 +13,23 @@ export default function Matrix({
     left: 30
   }
 
-  const n = nodes.length
+  const n = data.length
+  const columnCount = data[0]
+    ? data[0].length
+    : 0
   const width = cellSize
   const height = cellSize
 
   const z = d3.scaleLinear()
     .domain([0, colorUpperLimit])
     .clamp(true)
-
   return (
     <svg
-      width={width * n + margin.left + margin.right}
+      width={width * columnCount + margin.left + margin.right}
       height={height * n + margin.top + margin.bottom}>
         <g transform={"translate(" + margin.left + "," + margin.top + ")"}>
           {
-            matrix.map((cells, rowIdx) =>
+            data.map((cells, rowIdx) =>
               <g
                 key={rowIdx}
                 className="row"
@@ -74,22 +53,28 @@ export default function Matrix({
             )
           }
           {
-            matrix.map((col, colIdx) => (
-              <g
-                key={colIdx}
-                className="column"
-                transform={"translate(" + (width * colIdx) + ")rotate(-90)"}>
-                <line x1={-width} />
-                <text
-                  x={6} 
-                  y={width / 2}
-                  dy={`.${cellSize}em`} 
-                  fontSize={cellSize / 2}
-                  textAnchor="start">
-                    {colIdx}
-                </text>
-              </g>
-            ))
+            data.length === 0
+            ? null
+            : data[0].map((col, colIdx, arr) => (
+                <g
+                  key={colIdx}
+                  className="column"
+                  transform={"translate(" + (width * colIdx) + ")rotate(-90)"}>
+                  <line x1={-width} />
+                  {
+                    arr.length === 1
+                    ? null
+                    : <text
+                      x={6} 
+                      y={width / 2}
+                      dy={`.${cellSize}em`} 
+                      fontSize={cellSize / 2}
+                      textAnchor="start">
+                        {colIdx}
+                    </text>
+                  }
+                </g>
+              ))
           }
         </g>
     </svg>

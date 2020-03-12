@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 
-export function initMatrix(nodes, initMatrixEntry) {
+export function initMatrix(nodes, columnCount) {
   const matrix = []
   for (let i = 0; i < nodes.length; i++) {
       const node = {
@@ -10,7 +10,8 @@ export function initMatrix(nodes, initMatrixEntry) {
           destCount: 0
       }
 
-      matrix[i] = initMatrixEntry(i)
+      matrix[i] = [...Array(columnCount)]
+        .map((j) => ({x: j, y: i, z: 0}))
   }
   return matrix
 }
