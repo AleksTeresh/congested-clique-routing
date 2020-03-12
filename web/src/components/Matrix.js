@@ -10,8 +10,6 @@ function computeMatrix(nodes, matrix) {
       for (let j = 0; j < node.messages.length; j++) {
           const message = node.messages[j]
           matrix[node.id][message.finalDest].z++
-          nodes[node.id].srcCount++
-          nodes[message.finalDest].destCount++
       }
   }
   return matrix
@@ -19,7 +17,8 @@ function computeMatrix(nodes, matrix) {
 
 export default function Matrix({
   graphHistoryPoint,
-  colorUpperLimit
+  colorUpperLimit,
+  cellSize
 }) {
   const { nodes } = graphHistoryPoint
   const initMatrixRow = (rowIdx) => d3.range(nodes.length)
@@ -36,9 +35,10 @@ export default function Matrix({
     bottom: 10,
     left: 30
   }
-  const width = 36
-  const height = 36
+
   const n = nodes.length
+  const width = cellSize
+  const height = cellSize
 
   const z = d3.scaleLinear()
     .domain([0, colorUpperLimit])
@@ -68,7 +68,8 @@ export default function Matrix({
                   ))
                 }
                 <line x2={width} />
-                <text x={-6} y={width / 2} dy=".32em" textAnchor="end">{rowIdx}</text>
+                <text x={-6} y={width / 2} dy={`.${cellSize}em`} 
+                  fontSize={cellSize / 2} textAnchor="end">{rowIdx}</text>
               </g>
             )
           }
@@ -79,7 +80,14 @@ export default function Matrix({
                 className="column"
                 transform={"translate(" + (width * colIdx) + ")rotate(-90)"}>
                 <line x1={-width} />
-                <text x={6} y={width / 2} dy=".32em" textAnchor="start">{colIdx}</text>
+                <text
+                  x={6} 
+                  y={width / 2}
+                  dy={`.${cellSize}em`} 
+                  fontSize={cellSize / 2}
+                  textAnchor="start">
+                    {colIdx}
+                </text>
               </g>
             ))
           }

@@ -18,7 +18,8 @@ function computeColumn(nodes, matrix, propertyToVisualize) {
 export default function DataColumn({
   nodes,
   colorUpperLimit,
-  propertyToVisualize
+  propertyToVisualize,
+  cellSize
 }) {
   const emptyMatrix = initMatrix(
     nodes,
@@ -36,8 +37,8 @@ export default function DataColumn({
     bottom: 10,
     left: 30
   }
-  const width = 36
-  const height = 36
+  const width = cellSize
+  const height = cellSize
   const n = nodes.length
 
   const z = d3.scaleLinear()

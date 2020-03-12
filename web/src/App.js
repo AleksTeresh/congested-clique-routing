@@ -61,7 +61,8 @@ function App() {
   const wrappperStyle = {
     marginLeft: 'auto',
     marginRight: 'auto',
-    maxWidth: '1000px'
+    maxWidth: '1200px',
+    width: 'fit-content'
   }
 
   return (
