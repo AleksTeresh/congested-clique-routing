@@ -30,4 +30,12 @@ EMSCRIPTEN_BINDINGS(my_module) {
         register_vector<Message>("vector<Message>");
 
         emscripten::function("random_test", &random_test);
+        emscripten::function("test1", &test1);
+        emscripten::function("test2", &test2);
+        emscripten::function("test3", &test3);
+        emscripten::function("test4", &test4);
+        emscripten::function("test5", &test5);
+        emscripten::function("test6", &test6);
+        emscripten::function("test7", &test7);
+        emscripten::function("uniform_subset_test", &uniform_subset_test);
 }

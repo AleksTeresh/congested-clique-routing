@@ -6,13 +6,14 @@
 
 void check_arrived_messages(Vec<std::shared_ptr<Node>>& nodes);
 
-int test1();
-int test2();
-int test3();
-int test4();
-int test5();
-int test6();
-int test7();
+std::vector<TimePoint> test1();
+std::vector<TimePoint> test2();
+std::vector<TimePoint> test3();
+std::vector<TimePoint> test4();
+std::vector<TimePoint> test5();
+std::vector<TimePoint> test6();
+std::vector<TimePoint> test7();
+std::vector<TimePoint> uniform_subset_test(int n);
 
 std::vector<TimePoint> random_test(int subset_size);
 

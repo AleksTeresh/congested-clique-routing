@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/alexte/projects/ccr/cpp/clique-router.h
+node.h
+/Users/alexte/projects/ccr/cpp/node.h
+time-point.h
+/Users/alexte/projects/ccr/cpp/time-point.h
+
+/Users/alexte/projects/ccr/cpp/node.h
+vector
+-
+functional
+-
+memory
+-
+cmath
+-
+
+/Users/alexte/projects/ccr/cpp/test.cpp
+node.h
+/Users/alexte/projects/ccr/cpp/node.h
+clique-router.h
+/Users/alexte/projects/ccr/cpp/clique-router.h
+random
+-
+cassert
+-
+
+/Users/alexte/projects/ccr/cpp/time-point.h
+node.h
+/Users/alexte/projects/ccr/cpp/node.h
+vector
+-
+

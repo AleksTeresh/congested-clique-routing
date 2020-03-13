@@ -16,7 +16,7 @@ void check_arrived_messages(Vec<shared_ptr<Node>>& nodes) {
     }
 }
 
-int test1() {
+vector<TimePoint> test1() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -44,10 +44,10 @@ int test1() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
-int test2() {
+vector<TimePoint> test2() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -75,10 +75,10 @@ int test2() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
-int test3() {
+vector<TimePoint> test3() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -106,10 +106,10 @@ int test3() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
-int test4() {
+vector<TimePoint> test4() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -137,10 +137,10 @@ int test4() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
-int test5() {
+vector<TimePoint> test5() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -193,10 +193,29 @@ int test5() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
-int test6() {
+vector<TimePoint> uniform_subset_test(int setSize) {
+    Vec<shared_ptr<Node>> nodes;
+
+    for (int i = 0; i < setSize*setSize; i++) {
+        auto node = make_shared<Node>(i);
+        Vec<int> v(setSize*setSize);
+        std::iota(v.begin(), v.end(), 0);
+        node->add_messages(v);
+        nodes.push_back(node);
+    }
+
+    CliqueRouter cr;
+    cr.route(nodes);
+
+    check_arrived_messages(nodes);
+
+    return cr.get_history();
+}
+
+vector<TimePoint> test6() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -249,10 +268,10 @@ int test6() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
-int test7() {
+vector<TimePoint> test7() {
     Vec<shared_ptr<Node>> nodes;
 
     auto n1 = make_shared<Node>(0);
@@ -305,7 +324,7 @@ int test7() {
 
     check_arrived_messages(nodes);
 
-    return 0;
+    return cr.get_history();
 }
 
 vector<TimePoint> random_test(int subset_size) {
@@ -347,6 +366,7 @@ int run_tests () {
     test5();
     test6();
     test7();
+    uniform_subset_test(4);
 
     setbuf(stdout, nullptr);
     int test_count_per_size = 4;
