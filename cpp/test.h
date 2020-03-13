@@ -14,7 +14,7 @@ std::vector<TimePoint> test5();
 std::vector<TimePoint> test6();
 std::vector<TimePoint> test7();
 std::vector<TimePoint> uniform_subset_test(int n);
-
+std::vector<TimePoint> custom_test(std::vector<std::vector<int>> message_matrix);
 std::vector<TimePoint> random_test(int subset_size);
 
 int run_tests ();

@@ -196,25 +196,6 @@ vector<TimePoint> test5() {
     return cr.get_history();
 }
 
-vector<TimePoint> uniform_subset_test(int setSize) {
-    Vec<shared_ptr<Node>> nodes;
-
-    for (int i = 0; i < setSize*setSize; i++) {
-        auto node = make_shared<Node>(i);
-        Vec<int> v(setSize*setSize);
-        std::iota(v.begin(), v.end(), 0);
-        node->add_messages(v);
-        nodes.push_back(node);
-    }
-
-    CliqueRouter cr;
-    cr.route(nodes);
-
-    check_arrived_messages(nodes);
-
-    return cr.get_history();
-}
-
 vector<TimePoint> test6() {
     Vec<shared_ptr<Node>> nodes;
 
@@ -358,6 +339,42 @@ vector<TimePoint> random_test(int subset_size) {
     return cr.get_history();
 }
 
+vector<TimePoint> uniform_subset_test(int setSize) {
+    Vec<shared_ptr<Node>> nodes;
+
+    for (int i = 0; i < setSize*setSize; i++) {
+        auto node = make_shared<Node>(i);
+        Vec<int> v(setSize*setSize);
+        std::iota(v.begin(), v.end(), 0);
+        node->add_messages(v);
+        nodes.push_back(node);
+    }
+
+    CliqueRouter cr;
+    cr.route(nodes);
+
+    check_arrived_messages(nodes);
+
+    return cr.get_history();
+}
+
+vector<TimePoint> custom_test(vector<vector<int>> message_matrix) {
+    Vec<shared_ptr<Node>> nodes;
+
+    for (int i = 0; i < message_matrix.size(); i++) {
+        auto node = make_shared<Node>(i);
+        node->add_messages(message_matrix[i]);
+        nodes.push_back(node);
+    }
+
+    CliqueRouter cr;
+    cr.route(nodes);
+
+    check_arrived_messages(nodes);
+
+    return cr.get_history();
+}
+
 int run_tests () {
     test1();
     test2();
@@ -367,6 +384,7 @@ int run_tests () {
     test6();
     test7();
     uniform_subset_test(4);
+    custom_test({{0, 1, 2, 3}, {3, 2, 1, 0}, {0, 0, 1, 1}, {2, 2, 3, 3}});
 
     setbuf(stdout, nullptr);
     int test_count_per_size = 4;

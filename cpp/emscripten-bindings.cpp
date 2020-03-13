@@ -28,6 +28,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
         register_vector<NodeData>("vector<NodeData>");
         register_vector<MessageCount>("vector<MessageCount>");
         register_vector<Message>("vector<Message>");
+        register_vector<int>("Vec1");
+        register_vector<std::vector<int>>("Vec2");
 
         emscripten::function("random_test", &random_test);
         emscripten::function("test1", &test1);
@@ -38,4 +40,5 @@ EMSCRIPTEN_BINDINGS(my_module) {
         emscripten::function("test6", &test6);
         emscripten::function("test7", &test7);
         emscripten::function("uniform_subset_test", &uniform_subset_test);
+        emscripten::function("custom_test", &custom_test);
 }
