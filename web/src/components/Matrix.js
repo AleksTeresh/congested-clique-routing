@@ -38,7 +38,7 @@ export default function Matrix({
       style={svgStyle}
       width={width * columnCount * 2 + margin.left + margin.right}
       height={height * n + margin.top + margin.bottom}>
-        <g transform={"translate(" + margin.left + "," + margin.top + ")"}>
+        <g transform={"translate(" + (columnCount === 1 ? 0 : margin.left) + "," + margin.top + ")"}>
           {
             data.map((cells, rowIdx) =>
               <g
@@ -65,8 +65,12 @@ export default function Matrix({
                   ))
                 }
                 <line x2={width * columnCount} stroke={'#999999'} strokeWidth={0.5} />
-                <text x={-6} y={width / 2} dy={`.${cellSize.toFixed(0)}em`} 
+                {
+                  columnCount === 1
+                  ? null
+                  : <text x={-6} y={width / 2} dy={`.${cellSize.toFixed(0)}em`} 
                   fontSize={cellSize / 2} textAnchor="end">{rowIdx}</text>
+                }
                 {
                   editMode
                   ? <text
