@@ -4,12 +4,14 @@ import Visualization from './components/Visualization'
 import Textbox from './components/Textbox'
 
 import texts from './texts'
-import { computeRandom, computeUniform } from './cppClient'
+import { computeRandom, computeUniform, computeCustom } from './cppClient'
 
 function App() {
   const [setSize, setSetSize] = useState(4)
   const [round, setRound] = useState(0)
-  const [data, setData] = useState([{ nodes: [] }]) 
+  const [data, setData] = useState([{ nodes: [] }])
+  const [editMode, setEditMode] = useState(false)
+  const [customInput, setCustomInput] = useState([[]])
   const currRoundData = data[round]
 
   const loadRandomData = (setSize) => {
@@ -23,6 +25,34 @@ function App() {
     InitRuntime().then((Module) => {
       const d = computeUniform(Module, setSize)
       setData(d)
+      setRound(0)
+    })
+  }
+  const toggleEditMode = (setSize) => {
+    setEditMode(!editMode)
+    setCustomInput([...Array(setSize * setSize)].map(p => ([...Array(setSize * setSize)].map(s => 0))))
+  }
+  
+  const addToCustomInput = (row, col) => {
+    const newCustomInput = [...customInput]
+    const senginTotal = newCustomInput[row].reduce((a,b) => a + b, 0)
+    const receivingTotal = newCustomInput.reduce((a,b) => a + b[col], 0)
+    if (senginTotal < setSize * setSize && receivingTotal < setSize * setSize) {
+      newCustomInput[row][col]++
+      setCustomInput(newCustomInput) 
+    }
+  }
+  const removeFromCustomInput = (row, col) => {
+    const newCustomInput = [...customInput]
+    newCustomInput[row][col] = Math.max(0, newCustomInput[row][col] - 1)
+    setCustomInput(newCustomInput)
+  }
+
+  const startCustomCompute = () => {
+    InitRuntime().then((Module) => {
+      const d = computeCustom(Module, customInput)
+      setData(d)
+      setEditMode(false)
       setRound(0)
     })
   }
@@ -41,7 +71,6 @@ function App() {
     width: 'fit-content'
   }
   const wrappperStyle = { display: 'flex' }
-
   return (
     <div className="App" style={wrappperStyle}>
       <Textbox
@@ -50,15 +79,22 @@ function App() {
       <div style={visualizationStyle}>
         <Visualization
           data={data}
-          round={round} />
+          customInput={customInput}
+          round={round}
+          editMode={editMode}
+          addToCustomInput={addToCustomInput}
+          removeFromCustomInput={removeFromCustomInput} />
         <Toolbar
           round={round}
           handlePrev={handlePrev}
           handleNext={handleNext}
+          editMode={editMode}
           setSize={setSize}
           setSetSize={setSetSize}
           loadRandomData={loadRandomData}
-          loadUniformData={loadUniformData} />
+          loadUniformData={loadUniformData}
+          toggleEditMode={toggleEditMode}
+          startCustomCompute={startCustomCompute} />
       </div>
     </div>
   )

@@ -31,8 +31,11 @@ export default function Toolbar({
   handleNext,
   setSize,
   setSetSize,
+  editMode,
   loadRandomData,
-  loadUniformData
+  loadUniformData,
+  toggleEditMode,
+  startCustomCompute
 }) {
   const [tentativeSetSize, setTentativeSetSize] = useState(4)
 
@@ -40,6 +43,7 @@ export default function Toolbar({
     <div style={wrapperStyle}>
       <PrevNextButtons
         round={round}
+        editMode={editMode}
         handlePrev={handlePrev}
         handleNext={handleNext} />
       <InputControls
@@ -47,8 +51,11 @@ export default function Toolbar({
         setSetSize={setSetSize}
         tentativeSetSize={tentativeSetSize}
         setTentativeSetSize={setTentativeSetSize}
+        editMode={editMode}
         loadUniformData={loadUniformData}
-        loadRandomData={loadRandomData} />
+        loadRandomData={loadRandomData}
+        toggleEditMode={toggleEditMode}
+        startCustomCompute={startCustomCompute} />
     </div>
   )
 }
@@ -59,13 +66,17 @@ function InputControls({
   tentativeSetSize,
   setTentativeSetSize,
   loadRandomData,
-  loadUniformData
+  loadUniformData,
+  toggleEditMode,
+  editMode,
+  startCustomCompute
 }) {
   return <>
     <div style={inputControlsWrapperStyle}>
       <label id="numberOfNodes">{'Size of subset ' + tentativeSetSize}</label>
       <br />
       <input
+        disabled={editMode}
         onInput={(ev) => setTentativeSetSize(Number(ev.target.value))}
         type="range"
         min="1"
@@ -76,6 +87,7 @@ function InputControls({
     </div>
     <div>
       <button
+        disabled={editMode}
         style={buttonStyle}
         onClick={() => {
           loadRandomData(Number(tentativeSetSize))
@@ -85,6 +97,7 @@ function InputControls({
         Compute random
       </button>
       <button
+        disabled={editMode}
         style={buttonStyle}
         onClick={() => {
           loadUniformData(Number(tentativeSetSize))
@@ -93,6 +106,22 @@ function InputControls({
         id="computeBtn">
         Compute uniform
       </button>
+      <button
+        style={buttonStyle}
+        onClick={() => {
+          setSetSize(Number(tentativeSetSize))
+          toggleEditMode(Number(tentativeSetSize))
+        }}
+        id="computeBtn">
+        {editMode ? 'Cancel' : 'Edit input'}
+      </button>
+      <button
+        disabled={!editMode}
+        style={buttonStyle}
+        onClick={() => startCustomCompute()}
+        id="computeBtn">
+        Fill the rest and compute
+      </button>
     </div>
   </>
 }
@@ -100,7 +129,8 @@ function InputControls({
 function PrevNextButtons({
   round,
   handlePrev,
-  handleNext
+  handleNext,
+  editMode
 }) {
   const roundIndicatorStyle = {
     float: 'right',
@@ -109,16 +139,16 @@ function PrevNextButtons({
   return (
     <div style={nextPrevButtonStyle}>
       <input
+        disabled={editMode || round === 0}
         type="button"
         style={buttonStyle}
-        disabled={round === 0}
         onClick={handlePrev}
         value="Prev round"
         id="prevBtn" />
       <input
+        disabled={editMode || round === MAX_NUM_OF_ROUNDS}
         type="button"
         style={buttonStyle}
-        disabled={round === MAX_NUM_OF_ROUNDS}
         onClick={handleNext}
         value="Next round"
         id="nextBtn"/>

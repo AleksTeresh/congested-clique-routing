@@ -9,7 +9,7 @@ function computeColumn(nodes, matrix) {
       const node = nodes[i]
       for (let j = 0; j < node.messages.length; j++) {
           const message = node.messages[j]
-          matrix[node.id][0].z++
+          matrix[node.id][0]++
       }
   }
   return matrix
@@ -20,7 +20,7 @@ function computeMatrix(nodes, matrix) {
       const node = nodes[i]
       for (let j = 0; j < node.messages.length; j++) {
           const message = node.messages[j]
-          matrix[node.id][message.finalDest].z++
+          matrix[node.id][message.finalDest]++
       }
   }
   return matrix
@@ -53,11 +53,15 @@ function getMaxSizeOfProperty(data, property) {
 
 export default function Visualization({
   data,
-  round
+  customInput,
+  round,
+  editMode,
+  addToCustomInput,
+  removeFromCustomInput
 }) {
   const currRoundData = data[round]
   const nodes = currRoundData.nodes
-  const setSize = Math.round(Math.sqrt(nodes.length))
+  const setSize = Math.round(Math.sqrt(editMode ? customInput.length : nodes.length))
   const groupedNodes = groupPerSubclass(currRoundData)
 
   const maxMessagesSize = getMaxSizeOfProperty(data, 'messages')
@@ -89,18 +93,23 @@ export default function Visualization({
   return (
     <div style={{ display: 'flex' }}>
       <Matrix
+        hide={editMode}
         data={column}
         colorUpperLimit={maxMessagesSize}
         cellSize={Math.min(
           maxCellSize,
           mainMatrixSize / (setSize * setSize))} />
       <Matrix
-        data={matrix}
+        data={editMode ? customInput : matrix}
         colorUpperLimit={setSize * setSize}
+        editMode={editMode}
+        addToCustomInput={addToCustomInput}
+        removeFromCustomInput={removeFromCustomInput}
         cellSize={Math.min(
           maxCellSize,
           mainMatrixSize / (setSize * setSize))} />
       <Matrix
+        hide={editMode}
         data={groupedMatrix}
         colorUpperLimit={setSize * setSize * setSize}
         cellSize={Math.min(

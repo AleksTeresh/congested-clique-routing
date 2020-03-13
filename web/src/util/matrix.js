@@ -11,7 +11,7 @@ export function initMatrix(nodes, columnCount) {
       }
 
       matrix[i] = [...Array(columnCount)]
-        .map((j) => ({x: j, y: i, z: 0}))
+        .map((j) => 0)
   }
   return matrix
 }
