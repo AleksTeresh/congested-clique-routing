@@ -14,7 +14,6 @@ function App() {
 
   const loadRandomData = (setSize) => {
     InitRuntime().then((Module) => {
-      console.log('random')
       const d = computeRandom(Module, setSize)
       setData(d)
       setRound(0)
@@ -22,7 +21,6 @@ function App() {
   }
   const loadUniformData = (setSize) => {
     InitRuntime().then((Module) => {
-      console.log('uniform')
       const d = computeUniform(Module, setSize)
       setData(d)
       setRound(0)
