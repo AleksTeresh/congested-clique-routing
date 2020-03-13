@@ -13,7 +13,10 @@ export default function Textbox({
     display: 'inline-grid',
     padding: '10px',
     margin: '10px',
-    marginTop: '30px'
+    marginTop: '30px',
+    position: 'sticky',
+    top: '30px',
+    minWidth: '580px'
   }
   return (
     <div
