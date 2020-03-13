@@ -10,11 +10,15 @@ export default function Matrix({
   removeFromCustomInput,
   hide
 }) {
+  const svgStyle = {
+    alignSelf: 'flex-end',
+    visibility: hide ? 'hidden': ''
+  }
   const margin = {
-    top: 30,
-    right: 20,
+    top: 20,
+    right: 0,
     bottom: 20,
-    left: 30
+    left: 20
   }
   const n = data.length
   const columnCount = data[0]
@@ -31,8 +35,8 @@ export default function Matrix({
   const received = data.map((_, i) => data.reduce((a, b) => a + b[i], 0))
   return (
     <svg
-      style={{ alignSelf: 'flex-end', visibility: hide ? 'hidden': '' }}
-      width={width * columnCount + margin.left + margin.right}
+      style={svgStyle}
+      width={width * columnCount * 2 + margin.left + margin.right}
       height={height * n + margin.top + margin.bottom}>
         <g transform={"translate(" + margin.left + "," + margin.top + ")"}>
           {
