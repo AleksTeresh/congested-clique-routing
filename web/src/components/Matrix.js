@@ -20,7 +20,9 @@ export default function Matrix({
     bottom: 20,
     left: 20
   }
-  const n = data.length
+  const n = hide
+    ? 1 // if matrix is hidden, its height should not push other elements down
+    : data.length
   const columnCount = data[0]
     ? data[0].length
     : 0
