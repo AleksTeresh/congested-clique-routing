@@ -4,7 +4,8 @@ import MarkdownRender from './MarkdownRender'
 
 export default function Textbox({
   texts,
-  round
+  round,
+  editMode
 }) {
   const wrapperStyle = {
     border: '1px solid black',
@@ -19,15 +20,19 @@ export default function Textbox({
       style={wrapperStyle}>
       <MarkdownRender
         source={
-          texts
-            .algorithmSteps[round]
-            .title
+          editMode
+          ? texts.editInstructions
+          : texts
+              .algorithmSteps[round]
+              .title
         } />
       <MarkdownRender
         source={
-          texts
-            .algorithmSteps[round]
-            .detail} />
+          editMode
+          ? ''
+          : texts
+              .algorithmSteps[round]
+              .detail} />
     </div>
   )
 }

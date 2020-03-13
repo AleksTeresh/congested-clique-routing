@@ -76,7 +76,8 @@ function App() {
     <div className="App" style={wrappperStyle}>
       <Textbox
         texts={texts}
-        round={round} />
+        round={round}
+        editMode={editMode} />
       <div style={visualizationStyle}>
         <Visualization
           data={data}
