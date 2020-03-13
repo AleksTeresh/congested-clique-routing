@@ -68,6 +68,7 @@ function App() {
     marginLeft: 'auto',
     marginRight: '20px',
     maxWidth: '1200px',
+    minWidth: '800px',
     width: 'fit-content'
   }
   const wrappperStyle = { display: 'flex' }
