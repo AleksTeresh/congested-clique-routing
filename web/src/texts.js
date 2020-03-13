@@ -129,6 +129,6 @@ const texts = {
       detail: 'With the information obtained in the last 2 rounds, each node can deliver all the messages to their final destinations. This can be done in 2 rounds.\n\rSecond round.'
     }
   ],
-  editInstructions: '**Click** a cell to add a message between corresponding nodes.\n\r**Hold Shift and click** a cell, to remove messages.'
+  editInstructions: '**Click** a cell to add a message between corresponding nodes.\n\r**Hold Shift and click** a cell to remove messages.'
 }
 export default texts
