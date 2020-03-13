@@ -48,7 +48,7 @@ export default function Matrix({
                   ))
                 }
                 <line x2={width} />
-                <text x={-6} y={width / 2} dy={`.${cellSize}em`} 
+                <text x={-6} y={width / 2} dy={`.${cellSize.toFixed(0)}em`} 
                   fontSize={cellSize / 2} textAnchor="end">{rowIdx}</text>
               </g>
             )
@@ -68,7 +68,7 @@ export default function Matrix({
                     : <text
                       x={6} 
                       y={width / 2}
-                      dy={`.${cellSize}em`} 
+                      dy={`.${cellSize.toFixed(0)}em`}
                       fontSize={cellSize / 2}
                       textAnchor="start">
                         {colIdx}
