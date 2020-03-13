@@ -44,7 +44,13 @@ export default function Matrix({
                 {
                   cells.map((cell, cellIdx) => (
                     <rect
-                      onClick={() => editMode ? addToCustomInput(rowIdx, cellIdx) : null}
+                      onClick={(e) => {
+                        if (editMode) {
+                          e.shiftKey
+                          ? removeFromCustomInput(rowIdx, cellIdx)
+                          : addToCustomInput(rowIdx, cellIdx) 
+                        }
+                      }}
                       key={cellIdx}
                       className="cell"
                       x={width * cellIdx}
