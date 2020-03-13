@@ -4,7 +4,7 @@ import Visualization from './components/Visualization'
 import Textbox from './components/Textbox'
 
 import texts from './texts'
-import { computeRouting } from './cppClient'
+import { computeRandom, computeUniform } from './cppClient'
 
 function App() {
   const [setSize, setSetSize] = useState(4)
@@ -12,17 +12,26 @@ function App() {
   const [data, setData] = useState([{ nodes: [] }]) 
   const currRoundData = data[round]
 
-  const loadData = (setSize) => {
+  const loadRandomData = (setSize) => {
     InitRuntime().then((Module) => {
-      const d = computeRouting(Module, setSize)
+      console.log('random')
+      const d = computeRandom(Module, setSize)
+      setData(d)
+      setRound(0)
+    })
+  }
+  const loadUniformData = (setSize) => {
+    InitRuntime().then((Module) => {
+      console.log('uniform')
+      const d = computeUniform(Module, setSize)
       setData(d)
       setRound(0)
     })
   }
 
   useEffect(() => {
-    loadData(setSize)
-  }, [setSize])
+    loadRandomData(setSize)
+  }, [])
   
   const handlePrev = () => setRound(round - 1)
   const handleNext = () => setRound(round + 1)
@@ -50,7 +59,8 @@ function App() {
           handleNext={handleNext}
           setSize={setSize}
           setSetSize={setSetSize}
-          loadData={loadData} />
+          loadRandomData={loadRandomData}
+          loadUniformData={loadUniformData} />
       </div>
     </div>
   )

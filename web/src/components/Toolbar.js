@@ -31,7 +31,8 @@ export default function Toolbar({
   handleNext,
   setSize,
   setSetSize,
-  loadData
+  loadRandomData,
+  loadUniformData
 }) {
   const [tentativeSetSize, setTentativeSetSize] = useState(4)
 
@@ -46,7 +47,8 @@ export default function Toolbar({
         setSetSize={setSetSize}
         tentativeSetSize={tentativeSetSize}
         setTentativeSetSize={setTentativeSetSize}
-        loadData={loadData} />
+        loadUniformData={loadUniformData}
+        loadRandomData={loadRandomData} />
     </div>
   )
 }
@@ -56,7 +58,8 @@ function InputControls({
   setSetSize,
   tentativeSetSize,
   setTentativeSetSize,
-  loadData
+  loadRandomData,
+  loadUniformData
 }) {
   return <>
     <div style={inputControlsWrapperStyle}>
@@ -75,13 +78,21 @@ function InputControls({
       <button
         style={buttonStyle}
         onClick={() => {
-          if (tentativeSetSize === setSize) {
-            loadData(Number(tentativeSetSize))
-          } else {
-            setSetSize(Number(tentativeSetSize))
-          }
+          loadRandomData(Number(tentativeSetSize))
+          setSetSize(Number(tentativeSetSize))
         }}
-        id="computeBtn">Compute routing</button>
+        id="computeBtn">
+        Compute random
+      </button>
+      <button
+        style={buttonStyle}
+        onClick={() => {
+          loadUniformData(Number(tentativeSetSize))
+          setSetSize(Number(tentativeSetSize))
+        }}
+        id="computeBtn">
+        Compute uniform
+      </button>
     </div>
   </>
 }

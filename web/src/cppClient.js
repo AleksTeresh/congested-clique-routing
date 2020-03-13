@@ -1,11 +1,20 @@
-export function computeRouting(Module, setSize) {
+export function computeRandom(Module, setSize) {
   const res = Module.random_test(setSize)
-  const n = setSize * setSize
+  return cppToJSData(res)
+}
+
+export function computeUniform(Module, setSize) {
+  const res = Module.uniform_subset_test(setSize)
+  return cppToJSData(res)
+}
+
+export function cppToJSData(res) {
   const data = []
 
   for (let i = 0; i < res.size(); i++) {
     const dataPoint = res.get(i)
     const nodes = []
+    const n = dataPoint.nodes.size()
 
     for (let j = 0; j < n; j++) {
       const node = dataPoint.nodes.get(j)
