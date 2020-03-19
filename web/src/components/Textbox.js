@@ -21,6 +21,8 @@ export default function Textbox({
     <div
       style={wrapperStyle}>
       <MarkdownRender
+        source={texts.intro} />
+      <MarkdownRender
         source={
           editMode
           ? texts.editInstructions
