@@ -67,7 +67,7 @@ export default function Visualization({
   const maxMessagesSize = getMaxSizeOfProperty(data, 'messages')
 
   const maxCellSize = 32
-  const mainMatrixSize = 600
+  const mainMatrixSize = 550
   const secondaryMatrixSize = mainMatrixSize / 5
 
   const emptyColumn = initMatrix(

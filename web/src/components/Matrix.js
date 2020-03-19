@@ -14,18 +14,20 @@ export default function Matrix({
     alignSelf: 'flex-end',
     visibility: hide ? 'hidden': ''
   }
-  const margin = {
-    top: 20,
-    right: 0,
-    bottom: 20,
-    left: 20
-  }
-  const n = hide
-    ? 1 // if matrix is hidden, its height should not push other elements down
-    : data.length
   const columnCount = data[0]
     ? data[0].length
     : 0
+  const columnVector = columnCount === 1
+  const margin = {
+    top: cellSize,
+    right: columnVector ? 0 : (cellSize),
+    bottom: cellSize,
+    left: columnVector ? 0 : (cellSize)
+  }
+  const textShift = cellSize / (32 / 6)
+  const n = hide
+    ? 1 // if matrix is hidden, its height should not push other elements down
+    : data.length
   const width = cellSize
   const height = cellSize
 
@@ -38,9 +40,9 @@ export default function Matrix({
   return (
     <svg
       style={svgStyle}
-      width={width * columnCount * 2 + margin.left + margin.right}
+      width={width * columnCount + margin.left + margin.right}
       height={height * n + margin.top + margin.bottom}>
-        <g transform={"translate(" + (columnCount === 1 ? 0 : margin.left) + "," + margin.top + ")"}>
+        <g transform={"translate(" + (columnVector ? 0 : margin.left) + "," + margin.top + ")"}>
           {
             data.map((cells, rowIdx) =>
               <g
@@ -68,15 +70,15 @@ export default function Matrix({
                 }
                 <line x2={width * columnCount} stroke={'#999999'} strokeWidth={0.5} />
                 {
-                  columnCount === 1
+                  columnVector
                   ? null
-                  : <text x={-6} y={width / 2} dy={`.${cellSize.toFixed(0)}em`} 
+                  : <text x={-textShift} y={width / 2} dy={`.${cellSize.toFixed(0)}em`} 
                   fontSize={cellSize / 2} textAnchor="end">{rowIdx}</text>
                 }
                 {
                   editMode
                   ? <text
-                      x={6 + width * n}
+                      x={textShift + width * n}
                       y={width / 2}
                       dy={`.${cellSize.toFixed(0)}em`}
                       fontSize={cellSize / 2}
@@ -101,7 +103,7 @@ export default function Matrix({
                     arr.length === 1
                     ? null
                     : <text
-                      x={6} 
+                      x={textShift} 
                       y={width / 2}
                       dy={`.${cellSize.toFixed(0)}em`}
                       fontSize={cellSize / 2}
@@ -113,8 +115,8 @@ export default function Matrix({
                     editMode
                     ? <text
                         transform="rotate(90)"
-                        x={width / 2 + 6}
-                        y={height * n + 6}
+                        x={width / 2 + textShift}
+                        y={height * n + textShift}
                         dy={`.${cellSize.toFixed(0)}em`}
                         fontSize={cellSize / 2}
                         textAnchor="end">

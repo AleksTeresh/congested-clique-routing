@@ -80,7 +80,7 @@ function InputControls({
         onInput={(ev) => setTentativeSetSize(Number(ev.target.value))}
         type="range"
         min="1"
-        max="9"
+        max="7"
         value={tentativeSetSize}
         className="slider"
         id="nodesRange" />
