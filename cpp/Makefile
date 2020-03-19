@@ -6,4 +6,4 @@ OBJ = $(SRC:.cpp = .o)
 CliqueRouting: $(OBJ)
 	$(CC) $(CFLAGS) -o clique-routing $(OBJ)
 clean:
-	rm -f core *.o 
+	rm -f clique-routing *.o 
