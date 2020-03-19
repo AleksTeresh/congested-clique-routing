@@ -8,7 +8,6 @@ export default function Textbox({
   editMode
 }) {
   const wrapperStyle = {
-    border: '1px solid black',
     height: 'fit-content',
     display: 'inline-grid',
     padding: '10px',
