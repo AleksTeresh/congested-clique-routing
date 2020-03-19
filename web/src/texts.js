@@ -130,6 +130,6 @@ const texts = {
     }
   ],
   editInstructions: '**Click** a cell to add a message between corresponding nodes.\n\r**Hold Shift and click** a cell to remove messages.',
-  intro: `# Congested clique routing simulation\n\r This page attempts to visualize [Optimal Deterministic Routing algorithm on the Congested Clique](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf).\n\rBelow is a short description of the step currently displayed in the visualization on the right. Some of the sentences in the description are taken directly from the original paper.\n\r Source can be found [here](https://github.com/AleksTeresh/congested-clique-routing)`
+  intro: `# Congested clique routing simulation\n\r This page attempts to visualize [Optimal Deterministic Routing algorithm on the Congested Clique](https://people.mpi-inf.mpg.de/~clenzen/pubs/L13optimal.pdf).\n\r* [Source code](https://github.com/AleksTeresh/congested-clique-routing)\r * [Implementation-oriented description of the algorithm's steps](https://alekte.com/congested-clique-routing/algorithm) \n\rBelow is a short description of the step currently displayed in the visualization on the right. Some of the sentences in the description are taken directly from the original paper.`
 }
 export default texts
