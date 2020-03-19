@@ -1,7 +1,7 @@
 #ifndef CONGESTED_CLIQUE_ROUTING_TEST_H
 #define CONGESTED_CLIQUE_ROUTING_TEST_H
 
-#include "node.h"
+#include "helper-data-structs.h"
 #include "time-point.h"
 
 void check_arrived_messages(Vec<std::shared_ptr<Node>>& nodes);

@@ -1,7 +1,7 @@
 #ifndef CONGESTED_CLIQUE_ROUTING_COLOR_H
 #define CONGESTED_CLIQUE_ROUTING_COLOR_H
 
-#include "node.h"
+#include "helper-data-structs.h"
 
 using namespace std;
 

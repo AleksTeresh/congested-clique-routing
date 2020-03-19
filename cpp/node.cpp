@@ -1,5 +1,6 @@
 #include "color.h"
 #include "util.h"
+#include "node.h"
 #include <unordered_map>
 #include <cmath>
 #include <numeric>

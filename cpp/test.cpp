@@ -1,4 +1,4 @@
-#include "node.h"
+#include "test.h"
 #include "clique-router.h"
 #include <random>
 #include <cassert>

@@ -1,4 +1,4 @@
-#include "node.h"
+#include "color.h"
 
 using namespace std;
 
