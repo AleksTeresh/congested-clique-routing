@@ -17,7 +17,7 @@ Finally start local server with e.g.
 npx serve -d ./web/dist/
 ```
 
-## Building C++ sources
+## Building C++ source
 
 Navigate to `cpp` directory and compile the sources using `make`
 
