@@ -336,6 +336,8 @@ vector<TimePoint> random_test(int subset_size) {
     CliqueRouter cr;
     cr.route(nodes);
 
+    check_arrived_messages(nodes);
+
     return cr.get_history();
 }
 
