@@ -22,6 +22,7 @@ export default function Textbox({
       style={wrapperStyle}>
       <MarkdownRender
         source={texts.intro} />
+      <hr style={{ width: '100%' }} />
       <MarkdownRender
         source={
           editMode
