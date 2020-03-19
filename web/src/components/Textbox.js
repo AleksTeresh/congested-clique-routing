@@ -10,9 +10,9 @@ export default function Textbox({
   const wrapperStyle = {
     height: 'fit-content',
     display: 'inline-grid',
-    padding: '10px',
+    padding: '0px 10px',
     margin: '10px',
-    marginTop: '30px',
+    marginTop: '0px',
     position: 'sticky',
     top: '30px',
     minWidth: '580px'
