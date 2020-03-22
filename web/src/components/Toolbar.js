@@ -138,20 +138,22 @@ function PrevNextButtons({
   }
   return (
     <div style={nextPrevButtonStyle}>
-      <input
+      <button
         disabled={editMode || round === 0}
         type="button"
         style={buttonStyle}
         onClick={handlePrev}
-        value="Prev round"
-        id="prevBtn" />
-      <input
+        id="prevBtn">
+        Prev round
+      </button>
+      <button
         disabled={editMode || round === MAX_NUM_OF_ROUNDS}
         type="button"
         style={buttonStyle}
         onClick={handleNext}
-        value="Next round"
-        id="nextBtn"/>
+        id="nextBtn">
+        Next round
+      </button>
       <div style={roundIndicatorStyle}>
         <label>{'Round No: ' + round}</label>
       </div>
