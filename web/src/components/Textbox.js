@@ -9,7 +9,6 @@ export default function Textbox({
 }) {
   const wrapperStyle = {
     height: 'fit-content',
-    display: 'inline-grid',
     padding: '0px 10px',
     margin: '10px',
     marginTop: '0px',
@@ -22,7 +21,7 @@ export default function Textbox({
       style={wrapperStyle}>
       <MarkdownRender
         source={texts.intro} />
-      <hr style={{ width: '100%' }} />
+      <hr style={{ width: '100%', height: '0px' }} />
       <MarkdownRender
         source={
           editMode
