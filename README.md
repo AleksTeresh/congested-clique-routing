@@ -50,4 +50,4 @@ npx serve -d ./dist
 
 ## Algorithm
 
-An alternative description of the algorithm, which might be more useful for the purpose of implementation can be found [here](https://github.com/AleksTeresh/congested-clique-routing/blob/master/algorithm.Rmd)
+An alternative description of the algorithm, which might be more useful for the purpose of implementation can be found [here](https://alekte.com/congested-clique-routing/algorithm)
